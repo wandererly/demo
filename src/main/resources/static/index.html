@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HRM Admin</title>
+    <style>
+      .captcha-row,.captcha-box{display:none !important;}
+      .remember-row{display:none !important;}
+      .login-card .divider + .login-sub{margin-top:0;}
+    </style>
+    <script type="module" crossorigin src="/assets/index-BbDubJnM.js?v=5"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Cl5lv3cx.css?v=5">
+  </head>
+  <body>
+    <div id="app"></div>
+      <a href="/org.html" style="position:fixed;right:20px;bottom:20px;padding:10px 14px;background:#1f8b6a;color:#fff;border-radius:10px;font-size:14px;text-decoration:none;z-index:9999;box-shadow:0 8px 18px rgba(0,0,0,.12)">组织架构</a>    <script>
+    (function() {
+      var tries = 0;
+      var timer = setInterval(function() {
+        tries++;
+        var sidebar = document.querySelector('.sidebar');
+        if (!sidebar) {
+          if (tries > 60) { clearInterval(timer); }
+          return;
+        }
+        if (sidebar.querySelector('[data-org-link]')) {
+          clearInterval(timer);
+          return;
+        }
+        var link = document.createElement('a');
+        link.href = '/org.html';
+        link.textContent = '组织架构';
+        link.className = 'nav-link';
+        link.setAttribute('data-org-link', '1');
+        link.style.marginTop = '8px';
+        sidebar.appendChild(link);
+        clearInterval(timer);
+      }, 300);
+    })();
+  </script>    <script>
+    (function() {
+      var token = localStorage.getItem('hrm_token') || sessionStorage.getItem('hrm_token');
+      var cache = { depts: [], positions: [] };
+
+      function apiGet(url) {
+        var headers = token ? { Authorization: 'Bearer ' + token } : {};
+        return fetch(url, { headers: headers })
+          .then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+          .then(function(r) {
+            if (!r.ok || !r.body || r.body.code !== 0) throw new Error((r.body && r.body.message) || '加载失败');
+            return r.body.data || [];
+          });
+      }
+
+      function ensureDatalist(id) {
+        var dl = document.getElementById(id);
+        if (!dl) {
+          dl = document.createElement('datalist');
+          dl.id = id;
+          document.body.appendChild(dl);
+        }
+        return dl;
+      }
+
+      function fillDatalist(dl, items, getValue, getLabel) {
+        dl.innerHTML = '';
+        items.forEach(function(it) {
+          var opt = document.createElement('option');
+          opt.value = getValue(it);
+          var label = getLabel(it);
+          if (label) opt.label = label;
+          dl.appendChild(opt);
+        });
+      }
+
+      function applyLists() {
+        var deptList = ensureDatalist('dept-list');
+        var posList = ensureDatalist('position-list');
+        var statusList = ensureDatalist('status-list');
+
+        fillDatalist(deptList, cache.depts, function(d){ return String(d.id || ''); }, function(d){ return d.name || ''; });
+        fillDatalist(posList, cache.positions, function(p){ return p.positionName || ''; }, function(p){ return (p.positionCode || '') + ' ' + (p.levelName || ''); });
+        fillDatalist(statusList, [
+          { value: 'ACTIVE', label: '在职' },
+          { value: 'ON_LEAVE', label: '请假中' },
+          { value: 'INACTIVE', label: '停用' },
+          { value: 'RESIGNED', label: '离职' }
+        ], function(s){ return s.value; }, function(s){ return s.label; });
+
+        var inputs = Array.prototype.slice.call(document.querySelectorAll('input.input'));
+        inputs.forEach(function(inp) {
+          var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+          if (ph.includes('部门') || ph.includes('部门id') || ph.includes('上级部门')) {
+            inp.setAttribute('list', 'dept-list');
+            inp.setAttribute('inputmode', 'numeric');
+          }
+          if (ph.includes('岗位')) {
+            inp.setAttribute('list', 'position-list');
+          }
+          if (ph.includes('状态')) {
+            inp.setAttribute('list', 'status-list');
+          }
+        });
+      }
+
+      function loadData() {
+        if (!token) return;
+        Promise.all([
+          apiGet('/api/departments'),
+          apiGet('/api/org/positions')
+        ]).then(function(res) {
+          cache.depts = res[0] || [];
+          cache.positions = res[1] || [];
+          applyLists();
+        }).catch(function() {
+          applyLists();
+        });
+      }
+
+      // Re-apply because SPA renders after load
+      var tries = 0;
+      var timer = setInterval(function() {
+        tries++;
+        applyLists();
+        if (tries > 60) clearInterval(timer);
+      }, 500);
+
+      loadData();
+    })();
+  </script>    <script>
+    (function() {
+      var token = localStorage.getItem('hrm_token') || sessionStorage.getItem('hrm_token');
+      function apiGet(url) {
+        var headers = token ? { Authorization: 'Bearer ' + token } : {};
+        return fetch(url, { headers: headers })
+          .then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+          .then(function(r) {
+            if (!r.ok || !r.body || r.body.code !== 0) throw new Error((r.body && r.body.message) || '加载失败');
+            return r.body.data || [];
+          });
+      }
+
+      function ensureSelect(input, options) {
+        if (input.dataset.selectEnhanced === '1') return;
+        var select = document.createElement('select');
+        select.className = input.className;
+        select.style.width = '100%';
+        select.innerHTML = '<option value="">请选择</option>' + options.map(function(o){
+          return '<option value="' + String(o.value) + '">' + o.label + '</option>';
+        }).join('');
+        select.value = input.value || '';
+        select.addEventListener('change', function() {
+          input.value = select.value;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        input.style.display = 'none';
+        input.dataset.selectEnhanced = '1';
+        input.parentNode.insertBefore(select, input);
+      }
+
+      function enhance(depts, positions) {
+        var inputs = Array.prototype.slice.call(document.querySelectorAll('input.input'));
+        var statusOptions = [
+          { value: 'ACTIVE', label: '在职(Active)' },
+          { value: 'ON_LEAVE', label: '请假中' },
+          { value: 'INACTIVE', label: '停用' },
+          { value: 'RESIGNED', label: '离职' }
+        ];
+        inputs.forEach(function(inp) {
+          var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+          if (ph.includes('部门') || ph.includes('部门id') || ph.includes('上级部门')) {
+            var deptOptions = depts.map(function(d){ return { value: d.id, label: (d.name || '') + ' (ID ' + d.id + ')' }; });
+            ensureSelect(inp, deptOptions);
+          }
+          if (ph.includes('岗位')) {
+            var posOptions = positions.map(function(p){ return { value: p.positionName, label: (p.positionName || '') + ' / ' + (p.positionCode || '') }; });
+            ensureSelect(inp, posOptions);
+          }
+          if (ph.includes('状态')) {
+            ensureSelect(inp, statusOptions);
+          }
+        });
+      }
+
+      function loadAndEnhance() {
+        if (!token) return;
+        Promise.all([
+          apiGet('/api/departments'),
+          apiGet('/api/org/positions')
+        ]).then(function(res){
+          enhance(res[0] || [], res[1] || []);
+        }).catch(function(){
+          enhance([], []);
+        });
+      }
+
+      var tries = 0;
+      var timer = setInterval(function(){
+        tries++;
+        loadAndEnhance();
+        if (tries > 40) clearInterval(timer);
+      }, 500);
+    })();
+  </script>    <script>
+    // 岗位联动部门（前端增强）
+    (function() {
+      var token = localStorage.getItem('hrm_token') || sessionStorage.getItem('hrm_token');
+      function apiGet(url) {
+        var headers = token ? { Authorization: 'Bearer ' + token } : {};
+        return fetch(url, { headers: headers })
+          .then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+          .then(function(r) {
+            if (!r.ok || !r.body || r.body.code !== 0) throw new Error((r.body && r.body.message) || '加载失败');
+            return r.body.data || [];
+          });
+      }
+
+      function ensureSelect(input, options) {
+        if (input.dataset.selectEnhanced === '1') return input._linkedSelect;
+        var select = document.createElement('select');
+        select.className = input.className;
+        select.style.width = '100%';
+        select.innerHTML = '<option value="">请选择</option>' + options.map(function(o){
+          return '<option value="' + String(o.value) + '">' + o.label + '</option>';
+        }).join('');
+        select.value = input.value || '';
+        select.addEventListener('change', function() {
+          input.value = select.value;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        input.style.display = 'none';
+        input.dataset.selectEnhanced = '1';
+        input._linkedSelect = select;
+        input.parentNode.insertBefore(select, input);
+        return select;
+      }
+
+      function rebuildSelect(select, options) {
+        if (!select) return;
+        var current = select.value;
+        select.innerHTML = '<option value="">请选择</option>' + options.map(function(o){
+          return '<option value="' + String(o.value) + '">' + o.label + '</option>';
+        }).join('');
+        if (current) select.value = current;
+      }
+
+      function enhance(depts, positions) {
+        var inputs = Array.prototype.slice.call(document.querySelectorAll('input.input'));
+        var statusOptions = [
+          { value: 'ACTIVE', label: '在职(Active)' },
+          { value: 'ON_LEAVE', label: '请假中' },
+          { value: 'INACTIVE', label: '停用' },
+          { value: 'RESIGNED', label: '离职' }
+        ];
+
+        // Build maps
+        var deptMap = new Map(depts.map(function(d){ return [String(d.id), d]; }));
+        var posByDept = new Map();
+        positions.forEach(function(p){
+          var key = String(p.deptId || '');
+          if (!posByDept.has(key)) posByDept.set(key, []);
+          posByDept.get(key).push(p);
+        });
+
+        inputs.forEach(function(inp) {
+          var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+          if (ph.includes('部门') || ph.includes('部门id') || ph.includes('上级部门')) {
+            var deptOptions = depts.map(function(d){ return { value: d.id, label: (d.name || '') + ' (ID ' + d.id + ')' }; });
+            ensureSelect(inp, deptOptions);
+          }
+          if (ph.includes('岗位')) {
+            var posOptions = positions.map(function(p){ return { value: p.positionName, label: (p.positionName || '') + ' / ' + (p.positionCode || '') }; });
+            ensureSelect(inp, posOptions);
+          }
+          if (ph.includes('状态')) {
+            ensureSelect(inp, statusOptions);
+          }
+        });
+
+        // 联动：同一表单内，部门变更 -> 岗位列表过滤
+        var forms = Array.prototype.slice.call(document.querySelectorAll('.card'));
+        forms.forEach(function(card){
+          var deptInput = Array.prototype.slice.call(card.querySelectorAll('input.input')).find(function(inp){
+            var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+            return ph.includes('部门') || ph.includes('部门id') || ph.includes('上级部门');
+          });
+          var posInput = Array.prototype.slice.call(card.querySelectorAll('input.input')).find(function(inp){
+            var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+            return ph.includes('岗位');
+          });
+          if (!deptInput || !posInput) return;
+
+          var deptSelect = deptInput._linkedSelect || deptInput.previousSibling;
+          var posSelect = posInput._linkedSelect || posInput.previousSibling;
+
+          function refreshPositions() {
+            var deptId = String(deptSelect.value || '');
+            var list = posByDept.get(deptId) || positions;
+            var opts = list.map(function(p){
+              return { value: p.positionName, label: (p.positionName || '') + ' / ' + (p.positionCode || '') };
+            });
+            rebuildSelect(posSelect, opts);
+          }
+
+          if (deptSelect && !deptSelect.dataset.linked) {
+            deptSelect.dataset.linked = '1';
+            deptSelect.addEventListener('change', refreshPositions);
+            refreshPositions();
+          }
+        });
+      }
+
+      function loadAndEnhance() {
+        if (!token) return;
+        Promise.all([
+          apiGet('/api/departments'),
+          apiGet('/api/org/positions')
+        ]).then(function(res){
+          enhance(res[0] || [], res[1] || []);
+        }).catch(function(){
+          enhance([], []);
+        });
+      }
+
+      var tries = 0;
+      var timer = setInterval(function(){
+        tries++;
+        loadAndEnhance();
+        if (tries > 40) clearInterval(timer);
+      }, 500);
+    })();
+  </script>
+  <!-- 岗位联动部门 -->    <script>
+    // 表单增强 v3：岗位显示职级/薪资，回填职级；状态联动离职日期
+    (function() {
+      var token = localStorage.getItem('hrm_token') || sessionStorage.getItem('hrm_token');
+      function apiGet(url) {
+        var headers = token ? { Authorization: 'Bearer ' + token } : {};
+        return fetch(url, { headers: headers })
+          .then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+          .then(function(r) {
+            if (!r.ok || !r.body || r.body.code !== 0) throw new Error((r.body && r.body.message) || '加载失败');
+            return r.body.data || [];
+          });
+      }
+
+      function ensureSelect(input, options) {
+        if (input.dataset.selectEnhanced === '1') return input._linkedSelect;
+        var select = document.createElement('select');
+        select.className = input.className;
+        select.style.width = '100%';
+        select.innerHTML = '<option value="">请选择</option>' + options.map(function(o){
+          return '<option value="' + String(o.value) + '">' + o.label + '</option>';
+        }).join('');
+        select.value = input.value || '';
+        select.addEventListener('change', function() {
+          input.value = select.value;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        input.style.display = 'none';
+        input.dataset.selectEnhanced = '1';
+        input._linkedSelect = select;
+        input.parentNode.insertBefore(select, input);
+        return select;
+      }
+
+      function rebuildSelect(select, options) {
+        if (!select) return;
+        var current = select.value;
+        select.innerHTML = '<option value="">请选择</option>' + options.map(function(o){
+          return '<option value="' + String(o.value) + '">' + o.label + '</option>';
+        }).join('');
+        if (current) select.value = current;
+      }
+
+      function ensureExtraInput(afterInput, placeholder, key) {
+        if (afterInput && afterInput.parentNode) {
+          var parent = afterInput.parentNode;
+          var existing = parent.querySelector('input[data-extra="' + key + '"]');
+          if (existing) return existing;
+          var input = document.createElement('input');
+          input.className = afterInput.className;
+          input.placeholder = placeholder;
+          input.setAttribute('data-extra', key);
+          input.setAttribute('readonly', 'readonly');
+          parent.insertBefore(input, afterInput.nextSibling);
+          return input;
+        }
+        return null;
+      }
+
+      function enhance(depts, positions, levels) {
+        var inputs = Array.prototype.slice.call(document.querySelectorAll('input.input'));
+        var statusOptions = [
+          { value: 'ACTIVE', label: '在职(Active)' },
+          { value: 'ON_LEAVE', label: '请假中' },
+          { value: 'INACTIVE', label: '停用' },
+          { value: 'RESIGNED', label: '离职' }
+        ];
+
+        var levelMap = new Map(levels.map(function(l){ return [l.id, l]; }));
+        var posByDept = new Map();
+        positions.forEach(function(p){
+          var key = String(p.deptId || '');
+          if (!posByDept.has(key)) posByDept.set(key, []);
+          posByDept.get(key).push(p);
+        });
+
+        inputs.forEach(function(inp) {
+          var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+          if (ph.includes('部门') || ph.includes('部门id') || ph.includes('上级部门')) {
+            var deptOptions = depts.map(function(d){ return { value: d.id, label: (d.name || '') + ' (ID ' + d.id + ')' }; });
+            ensureSelect(inp, deptOptions);
+          }
+          if (ph.includes('岗位')) {
+            var posOptions = positions.map(function(p){
+              var level = levelMap.get(p.levelId) || {};
+              var range = level.salaryMin != null ? (level.salaryMin + '-' + level.salaryMax) : '-';
+              var label = (p.positionName || '') + ' / ' + (level.levelName || '-') + ' / ' + range;
+              return { value: p.positionName, label: label };
+            });
+            ensureSelect(inp, posOptions);
+          }
+          if (ph.includes('状态')) {
+            ensureSelect(inp, statusOptions);
+          }
+        });
+
+        // 联动：部门->岗位过滤 + 岗位->职级回填
+        var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+        cards.forEach(function(card){
+          var deptInput = Array.prototype.slice.call(card.querySelectorAll('input.input')).find(function(inp){
+            var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+            return ph.includes('部门') || ph.includes('部门id') || ph.includes('上级部门');
+          });
+          var posInput = Array.prototype.slice.call(card.querySelectorAll('input.input')).find(function(inp){
+            var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+            return ph.includes('岗位');
+          });
+          var statusInput = Array.prototype.slice.call(card.querySelectorAll('input.input')).find(function(inp){
+            var ph = (inp.getAttribute('placeholder') || '').toLowerCase();
+            return ph.includes('状态');
+          });
+
+          var deptSelect = deptInput ? (deptInput._linkedSelect || deptInput.previousSibling) : null;
+          var posSelect = posInput ? (posInput._linkedSelect || posInput.previousSibling) : null;
+
+          function refreshPositions() {
+            if (!posSelect) return;
+            var deptId = deptSelect ? String(deptSelect.value || '') : '';
+            var list = posByDept.get(deptId) || positions;
+            var opts = list.map(function(p){
+              var level = levelMap.get(p.levelId) || {};
+              var range = level.salaryMin != null ? (level.salaryMin + '-' + level.salaryMax) : '-';
+              var label = (p.positionName || '') + ' / ' + (level.levelName || '-') + ' / ' + range;
+              return { value: p.positionName, label: label };
+            });
+            rebuildSelect(posSelect, opts);
+          }
+
+          function fillLevel() {
+            if (!posSelect || !posInput) return;
+            var selectedName = posSelect.value;
+            var pos = positions.find(function(p){ return p.positionName === selectedName; });
+            var level = pos ? levelMap.get(pos.levelId) : null;
+            var levelInput = ensureExtraInput(posInput, '职级(自动)', 'auto-level');
+            var rangeInput = ensureExtraInput(posInput, '薪资范围(自动)', 'auto-range');
+            if (level) {
+              levelInput.value = level.levelName || '';
+              var range = level.salaryMin != null ? (level.salaryMin + '-' + level.salaryMax) : '';
+              rangeInput.value = range;
+            } else {
+              if (levelInput) levelInput.value = '';
+              if (rangeInput) rangeInput.value = '';
+            }
+          }
+
+          if (deptSelect && !deptSelect.dataset.linkedV3) {
+            deptSelect.dataset.linkedV3 = '1';
+            deptSelect.addEventListener('change', function(){
+              refreshPositions();
+              fillLevel();
+            });
+            refreshPositions();
+          }
+
+          if (posSelect && !posSelect.dataset.levelBind) {
+            posSelect.dataset.levelBind = '1';
+            posSelect.addEventListener('change', fillLevel);
+            fillLevel();
+          }
+
+          // 状态联动离职日期
+          if (statusInput) {
+            var statusSelect = statusInput._linkedSelect || statusInput.previousSibling;
+            if (statusSelect && !statusSelect.dataset.leaveBind) {
+              statusSelect.dataset.leaveBind = '1';
+              var leaveInput = statusInput.parentNode.querySelector('input[data-extra="leave-date"]');
+              if (!leaveInput) {
+                leaveInput = document.createElement('input');
+                leaveInput.type = 'date';
+                leaveInput.className = statusInput.className;
+                leaveInput.placeholder = '离职日期';
+                leaveInput.setAttribute('data-extra', 'leave-date');
+                statusInput.parentNode.insertBefore(leaveInput, statusInput.nextSibling);
+              }
+              function toggleLeave() {
+                var show = statusSelect.value === 'RESIGNED';
+                leaveInput.style.display = show ? '' : 'none';
+                if (!show) leaveInput.value = '';
+              }
+              statusSelect.addEventListener('change', toggleLeave);
+              toggleLeave();
+            }
+          }
+        });
+      }
+
+      function loadAndEnhance() {
+        if (!token) return;
+        Promise.all([
+          apiGet('/api/departments'),
+          apiGet('/api/org/positions'),
+          apiGet('/api/org/levels')
+        ]).then(function(res){
+          enhance(res[0] || [], res[1] || [], res[2] || []);
+        }).catch(function(){
+          enhance([], [], []);
+        });
+      }
+
+      var tries = 0;
+      var timer = setInterval(function(){
+        tries++;
+        loadAndEnhance();
+        if (tries > 40) clearInterval(timer);
+      }, 600);
+    })();
+  </script>    <script>
+    (function() {
+      var tries = 0;
+      var timer = setInterval(function() {
+        tries++;
+        var sidebar = document.querySelector('.sidebar');
+        if (!sidebar) { if (tries > 60) clearInterval(timer); return; }
+        if (!sidebar.querySelector('[data-perf-link]')) {
+          var link = document.createElement('a');
+          link.href = '/performance';
+          link.textContent = '绩效审批';
+          link.className = 'nav-link';
+          link.setAttribute('data-perf-link','1');
+          sidebar.appendChild(link);
+        }
+        if (!sidebar.querySelector('[data-payroll-link]')) {
+          var link2 = document.createElement('a');
+          link2.href = '/payroll';
+          link2.textContent = '薪酬明细';
+          link2.className = 'nav-link';
+          link2.setAttribute('data-payroll-link','1');
+          sidebar.appendChild(link2);
+        }
+        clearInterval(timer);
+      }, 400);
+    })();
+  </script>    <style>
+    .native-panel { background:#fff;border:1px solid #e6e1d8;border-radius:16px;padding:16px;margin-top:16px;box-shadow:0 10px 28px rgba(21,31,41,.08); }
+    .native-panel h3 { margin:0 0 12px; }
+    .native-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
+    .native-input { border:1px solid #e6e1d8;border-radius:10px;padding:8px 10px;font-size:14px;width:100%; }
+    .native-btn { background:#1f8b6a;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:600;cursor:pointer; }
+    .native-table { width:100%; border-collapse:collapse; }
+    .native-table th,.native-table td{ padding:8px 10px;border-bottom:1px solid #e6e1d8;text-align:left;font-size:13px; }
+    .native-table th{ color:#6f7b86;font-weight:600; }
+  </style>
+  <script>
+    // 原生组件：绩效审批 & 薪酬明细
+    (function(){
+      var token = localStorage.getItem('hrm_token') || sessionStorage.getItem('hrm_token');
+      function apiGet(url){
+        var headers = token ? { Authorization: 'Bearer ' + token } : {};
+        return fetch(url,{headers}).then(r=>r.json()).then(d=>{ if(d.code!==0) throw new Error(d.message); return d.data;});
+      }
+      function apiPost(url, body){
+        var headers = token ? { 'Content-Type':'application/json', Authorization: 'Bearer ' + token } : { 'Content-Type':'application/json' };
+        return fetch(url,{method:'POST',headers,body:JSON.stringify(body)}).then(r=>r.json()).then(d=>{ if(d.code!==0) throw new Error(d.message); return d.data;});
+      }
+      function findMain(){
+        return document.querySelector('.content') || document.querySelector('.main') || document.querySelector('main') || document.querySelector('.page') || document.body;
+      }
+
+      function mountPerformance(){
+        var container = findMain();
+        if (!container || container.querySelector('[data-native-perf]')) return;
+        var panel = document.createElement('section');
+        panel.className = 'native-panel';
+        panel.setAttribute('data-native-perf','1');
+        panel.innerHTML = `
+          <h3>绩效审批（原生）</h3>
+          <div class="native-grid">
+            <input class="native-input" id="np-cycleId" placeholder="绩效周期ID" value="1" />
+            <button class="native-btn" id="np-load">加载绩效</button>
+          </div>
+          <div class="native-grid" style="margin-top:10px;">
+            <input class="native-input" id="np-reviewId" placeholder="评估记录ID" />
+            <input class="native-input" id="np-approverId" placeholder="审批人ID" />
+            <select class="native-input" id="np-status">
+              <option value="APPROVED">通过</option>
+              <option value="REJECTED">驳回</option>
+              <option value="PENDING">待审批</option>
+            </select>
+            <input class="native-input" id="np-comment" placeholder="审批意见" />
+            <button class="native-btn" id="np-approve">提交审批</button>
+          </div>
+          <table class="native-table" style="margin-top:12px;">
+            <thead>
+              <tr><th>ID</th><th>员工ID</th><th>目标摘要</th><th>评分</th><th>等级</th><th>审批状态</th><th>审批人</th><th>审批时间</th><th>评语</th></tr>
+            </thead>
+            <tbody id="np-table"></tbody>
+          </table>
+        `;
+        container.insertBefore(panel, container.firstChild);
+
+        var table = panel.querySelector('#np-table');
+        function render(rows){
+          table.innerHTML='';
+          rows.forEach(function(r){
+            var tr=document.createElement('tr');
+            tr.innerHTML = `<td>${r.id}</td><td>${r.empId}</td><td>${r.goalSummary||''}</td><td>${r.score}</td><td>${r.level}</td><td>${r.approvalStatus||''}</td><td>${r.approverId||''}</td><td>${r.approvedAt||''}</td><td>${r.comment||''}</td>`;
+            table.appendChild(tr);
+          });
+        }
+        panel.querySelector('#np-load').onclick = function(){
+          var cid = panel.querySelector('#np-cycleId').value || '1';
+          apiGet('/api/performance/cycles/' + cid + '/reviews').then(render).catch(()=>{});
+        };
+        panel.querySelector('#np-approve').onclick = function(){
+          var id = panel.querySelector('#np-reviewId').value;
+          if(!id) return;
+          var body = {
+            approvalStatus: panel.querySelector('#np-status').value,
+            approverId: panel.querySelector('#np-approverId').value ? Number(panel.querySelector('#np-approverId').value) : null,
+            comment: panel.querySelector('#np-comment').value
+          };
+          apiPost('/api/performance/reviews/' + id + '/approve', body)
+            .then(()=>panel.querySelector('#np-load').click())
+            .catch(()=>{});
+        };
+      }
+
+      function mountPayroll(){
+        var container = findMain();
+        if (!container || container.querySelector('[data-native-payroll]')) return;
+        var panel = document.createElement('section');
+        panel.className = 'native-panel';
+        panel.setAttribute('data-native-payroll','1');
+        panel.innerHTML = `
+          <h3>薪酬明细（原生）</h3>
+          <div class="native-grid">
+            <input class="native-input" id="np-base" placeholder="基础薪资" value="15000" />
+            <input class="native-input" id="np-allow" placeholder="津贴" value="800" />
+            <input class="native-input" id="np-bonus" placeholder="绩效奖金" value="1200" />
+            <input class="native-input" id="np-otH" placeholder="加班小时" value="6" />
+            <input class="native-input" id="np-otR" placeholder="加班时薪" value="80" />
+            <input class="native-input" id="np-leave" placeholder="请假天数" value="1" />
+            <input class="native-input" id="np-leaveDed" placeholder="请假扣款/天" value="200" />
+            <input class="native-input" id="np-ss" placeholder="社保" value="500" />
+            <input class="native-input" id="np-hf" placeholder="公积金" value="500" />
+            <input class="native-input" id="np-tax" placeholder="税率(可空)" value="0.1" />
+            <button class="native-btn" id="np-calc">计算</button>
+          </div>
+          <table class="native-table" style="margin-top:12px;">
+            <thead><tr><th>税前合计</th><th>应税收入</th><th>税额</th><th>社保</th><th>公积金</th><th>税后实发</th></tr></thead>
+            <tbody id="np-payroll-table"></tbody>
+          </table>
+        `;
+        container.insertBefore(panel, container.firstChild);
+
+        var tbody = panel.querySelector('#np-payroll-table');
+        function render(r){
+          tbody.innerHTML = '';
+          var tr = document.createElement('tr');
+          tr.innerHTML = `<td>${r.grossSalary}</td><td>${r.taxableIncome}</td><td>${r.tax}</td><td>${r.socialSecurity}</td><td>${r.housingFund}</td><td>${r.netSalary}</td>`;
+          tbody.appendChild(tr);
+        }
+        panel.querySelector('#np-calc').onclick = function(){
+          var body = {
+            baseSalary: Number(panel.querySelector('#np-base').value || 0),
+            allowance: Number(panel.querySelector('#np-allow').value || 0),
+            bonus: Number(panel.querySelector('#np-bonus').value || 0),
+            overtimeHours: Number(panel.querySelector('#np-otH').value || 0),
+            overtimeRate: Number(panel.querySelector('#np-otR').value || 0),
+            leaveDays: Number(panel.querySelector('#np-leave').value || 0),
+            leaveDeductionPerDay: Number(panel.querySelector('#np-leaveDed').value || 0),
+            socialSecurity: Number(panel.querySelector('#np-ss').value || 0),
+            housingFund: Number(panel.querySelector('#np-hf').value || 0),
+            taxRate: panel.querySelector('#np-tax').value === '' ? null : Number(panel.querySelector('#np-tax').value)
+          };
+          apiPost('/api/payroll/calc', body).then(render).catch(()=>{});
+        };
+      }
+
+      function onRoute(){
+        var path = location.pathname;
+        if (path.startsWith('/performance')) {
+          mountPerformance();
+        }
+        if (path.startsWith('/payroll')) {
+          mountPayroll();
+        }
+      }
+      var _push = history.pushState;
+      history.pushState = function(){ _push.apply(this, arguments); setTimeout(onRoute, 50); };
+      window.addEventListener('popstate', function(){ setTimeout(onRoute, 50); });
+      setTimeout(onRoute, 200);
+    })();
+  </script>  </body>
+</html>
+
+
+
+
+
+
+
+
+
