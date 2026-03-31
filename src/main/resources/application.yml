@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: hrm
+  datasource:
+    url: jdbc:mysql://localhost:3306/hrm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 041029
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  type-aliases-package: com.hrm.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+security:
+  jwt:
+    secret: "change-this-secret-please-change-32bytes"
+    expire-minutes: 120

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>薪酬明细 | 人事一体化平台</title>
+    <style>
+      :root { --bg:#f6f2ea; --card:#fff; --border:#e6e1d8; --text:#1d2b36; --muted:#6f7b86; --primary:#1f8b6a; }
+      body{margin:0;font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(180deg,#f6f2ea 0%,#f2f7f4 100%);color:var(--text);} 
+      .page{max-width:1100px;margin:32px auto 60px;padding:0 20px;}
+      .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+      .title{font-size:26px;font-weight:700;}
+      .subtitle{color:var(--muted);margin-top:6px;}
+      .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;box-shadow:0 10px 28px rgba(21,31,41,.08);margin-bottom:16px;}
+      .table{width:100%;border-collapse:collapse;}
+      .table th,.table td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;font-size:14px;}
+      .table th{color:var(--muted);font-weight:600;}
+      .input{border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;width:100%;}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+      .btn{background:var(--primary);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;}
+      .alert{padding:12px 14px;background:#fff0f0;border:1px solid #f5c2c2;color:#b54848;border-radius:10px;margin-bottom:12px;}
+      a{color:#fff;text-decoration:none;}
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <div>
+          <div class="title">薪酬明细（税前/税后/社保公积金）</div>
+          <div class="subtitle">完整薪酬拆解与税费计算</div>
+        </div>
+        <div><a class="btn" href="/">返回系统</a></div>
+      </div>
+
+      <div id="alert" class="alert" style="display:none"></div>
+
+      <div class="card">
+        <h3>薪酬计算</h3>
+        <div class="grid">
+          <input class="input" id="baseSalary" placeholder="基础薪资" value="15000" />
+          <input class="input" id="allowance" placeholder="津贴" value="800" />
+          <input class="input" id="bonus" placeholder="绩效奖金" value="1200" />
+          <input class="input" id="overtimeHours" placeholder="加班小时" value="6" />
+          <input class="input" id="overtimeRate" placeholder="加班时薪" value="80" />
+          <input class="input" id="leaveDays" placeholder="请假天数" value="1" />
+          <input class="input" id="leaveDeductionPerDay" placeholder="请假扣款/天" value="200" />
+          <input class="input" id="socialSecurity" placeholder="社保" value="500" />
+          <input class="input" id="housingFund" placeholder="公积金" value="500" />
+          <input class="input" id="taxRate" placeholder="税率(可空)" value="0.1" />
+          <button class="btn" id="calcBtn">计算</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>计算结果</h3>
+        <table class="table" id="calcTable">
+          <thead>
+            <tr>
+              <th>税前合计</th>
+              <th>应税收入</th>
+              <th>税额</th>
+              <th>社保</th>
+              <th>公积金</th>
+              <th>税后实发</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const token = localStorage.getItem('hrm_token') || sessionStorage.getItem('hrm_token');
+      const alertBox = document.getElementById('alert');
+      function showAlert(msg){ alertBox.style.display='block'; alertBox.textContent=msg; }
+      function apiPost(url, body){
+        const headers = token ? { 'Content-Type':'application/json', Authorization: 'Bearer ' + token } : { 'Content-Type':'application/json' };
+        return fetch(url,{method:'POST',headers,body:JSON.stringify(body)})
+          .then(r=>r.json()).then(d=>{ if(d.code!==0) throw new Error(d.message); return d.data;});
+      }
+      function renderResult(r){
+        const tbody = document.querySelector('#calcTable tbody');
+        tbody.innerHTML = '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.grossSalary}</td><td>${r.taxableIncome}</td><td>${r.tax}</td><td>${r.socialSecurity}</td><td>${r.housingFund}</td><td>${r.netSalary}</td>`;
+        tbody.appendChild(tr);
+      }
+      document.getElementById('calcBtn').onclick = function(){
+        const body = {
+          baseSalary: Number(document.getElementById('baseSalary').value || 0),
+          allowance: Number(document.getElementById('allowance').value || 0),
+          bonus: Number(document.getElementById('bonus').value || 0),
+          overtimeHours: Number(document.getElementById('overtimeHours').value || 0),
+          overtimeRate: Number(document.getElementById('overtimeRate').value || 0),
+          leaveDays: Number(document.getElementById('leaveDays').value || 0),
+          leaveDeductionPerDay: Number(document.getElementById('leaveDeductionPerDay').value || 0),
+          socialSecurity: Number(document.getElementById('socialSecurity').value || 0),
+          housingFund: Number(document.getElementById('housingFund').value || 0),
+          taxRate: document.getElementById('taxRate').value === '' ? null : Number(document.getElementById('taxRate').value)
+        };
+        apiPost('/api/payroll/calc', body).then(renderResult).catch(e=>showAlert(e.message));
+      };
+    </script>
+  </body>
+</html>
