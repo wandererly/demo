@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolchains>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>21</version>
+    </provides>
+    <configuration>
+      <jdkHome>C:\Users\10204\.vscode\extensions\redhat.java-1.53.0-win32-x64\jre\21.0.10-win32-x86_64</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
