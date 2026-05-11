@@ -47,6 +47,7 @@ public class RbacServiceImpl implements RbacService {
 		user.setUsername(request.getUsername());
 		user.setPasswordHash(encodeIfNeeded(request.getPasswordHash()));
 		user.setRole(request.getRole() == null ? "EMPLOYEE" : request.getRole());
+		user.setEmpId(request.getEmpId());
 		user.setStatus(request.getStatus() == null ? "ACTIVE" : request.getStatus());
 		sysUserMapper.insert(user);
 		return user;
@@ -62,6 +63,7 @@ public class RbacServiceImpl implements RbacService {
 		String passwordHash = request.getPasswordHash();
 		user.setPasswordHash(passwordHash == null ? user.getPasswordHash() : encodeIfNeeded(passwordHash));
 		user.setRole(request.getRole() == null ? user.getRole() : request.getRole());
+		user.setEmpId(request.getEmpId() == null ? user.getEmpId() : request.getEmpId());
 		user.setStatus(request.getStatus() == null ? user.getStatus() : request.getStatus());
 		sysUserMapper.update(user);
 		return user;

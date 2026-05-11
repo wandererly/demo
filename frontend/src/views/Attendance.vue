@@ -64,7 +64,7 @@
           <thead><tr><th>序号</th><th>员工</th><th>日期</th><th>签到</th><th>签退</th><th>状态</th><th>操作</th></tr></thead>
           <tbody>
             <tr v-for="(item, index) in pagedList" :key="item.id">
-              <td>{{ rowNumber(index) }}</td>
+              <td>{{ index + 1 }}</td>
               <td>{{ employeeName(item.empId) }}</td>
               <td>{{ item.workDate }}</td>
               <td>{{ fmtDisplay(item.checkIn) }}</td>
@@ -77,7 +77,7 @@
             </tr>
           </tbody>
         </table>
-        <Pager :total="filteredList.length" :page="page" :total-pages="totalPages" @prev="prevPage" @next="nextPage" />
+        <Pager :total="pagedList.length" :page="page" :total-pages="totalPages" :label="pageLabel" @prev="prevPage" @next="nextPage" />
       </section>
     </template>
 
@@ -152,7 +152,7 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h, onMounted, ref } from 'vue'
+import { computed, defineComponent, h, onMounted, ref, watch } from 'vue'
 import { http } from '../api/http'
 
 const tabs = [
@@ -182,7 +182,7 @@ const overtimeForm = ref({ empId: '', workDate: '', hours: '', reason: '' })
 const summaryForm = ref({ cycleMonth: new Date().toISOString().slice(0, 7), empId: '' })
 const search = ref('')
 const page = ref(1)
-const pageSize = 6
+const pageSize = 1
 
 const filteredList = computed(() => {
   const key = search.value.trim().toLowerCase()
@@ -190,15 +190,27 @@ const filteredList = computed(() => {
   return [...source].sort((a, b) => {
     const dateCompare = String(b.workDate || '').localeCompare(String(a.workDate || ''))
     if (dateCompare !== 0) return dateCompare
-    const employeeCompare = Number(a.empId || 0) - Number(b.empId || 0)
-    if (employeeCompare !== 0) return employeeCompare
-    const checkInCompare = String(a.checkIn || '').localeCompare(String(b.checkIn || ''))
+    const checkInCompare = checkInSortValue(a).localeCompare(checkInSortValue(b))
     if (checkInCompare !== 0) return checkInCompare
+    const employeeCompare = employeeName(a.empId).localeCompare(employeeName(b.empId), 'zh-CN')
+    if (employeeCompare !== 0) return employeeCompare
     return Number(a.id || 0) - Number(b.id || 0)
   })
 })
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredList.value.length / pageSize)))
-const pagedList = computed(() => filteredList.value.slice((page.value - 1) * pageSize, page.value * pageSize))
+const groupedDates = computed(() => {
+  const dates = []
+  const seen = new Set()
+  filteredList.value.forEach((item) => {
+    if (!item.workDate || seen.has(item.workDate)) return
+    seen.add(item.workDate)
+    dates.push(item.workDate)
+  })
+  return dates
+})
+const totalPages = computed(() => Math.max(1, groupedDates.value.length))
+const currentDate = computed(() => groupedDates.value[Math.min(page.value - 1, groupedDates.value.length - 1)] || '')
+const pagedList = computed(() => currentDate.value ? filteredList.value.filter((item) => item.workDate === currentDate.value) : [])
+const pageLabel = computed(() => currentDate.value ? `${currentDate.value} · 第 ${page.value} / ${totalPages.value} 天` : `第 ${page.value} / ${totalPages.value} 天`)
 const shiftColumns = [{ key: 'shiftName', label: '班次' }, { key: 'startTime', label: '上班' }, { key: 'endTime', label: '下班' }, { key: 'workHours', label: '工时' }, { key: 'status', label: '状态' }]
 const holidayColumns = [{ key: 'holidayDate', label: '日期' }, { key: 'holidayName', label: '名称' }, { key: 'holidayType', label: '类型' }]
 
@@ -268,23 +280,33 @@ const submit = async (url, body, message) => {
 
 const prevPage = () => { if (page.value > 1) page.value -= 1 }
 const nextPage = () => { if (page.value < totalPages.value) page.value += 1 }
-const rowNumber = (index) => (page.value - 1) * pageSize + index + 1
 const employeeName = (id) => employees.value.find((item) => String(item.id) === String(id))?.name || `员工 #${id || '-'}`
 const employeeLabel = (employee) => `${employee.name}${employee.position ? `（${employee.position}）` : ''}`
 const statusText = (status) => ({ NORMAL: '正常', LATE: '迟到', EARLY_LEAVE: '早退', ABSENT: '缺勤', LEAVE: '请假' }[status] || status || '-')
 const approvalStatus = (status) => ({ PENDING: '待审批', APPROVED: '已通过', REJECTED: '已驳回' }[status] || status || '-')
 const fmtDisplay = (value) => value ? String(value).replace('T', ' ').slice(0, 16) : '-'
 const fmtInput = (value) => value ? String(value).slice(0, 16) : ''
+const checkInSortValue = (item) => item.checkIn ? String(item.checkIn) : '9999-12-31T23:59:59'
+
+watch(search, () => {
+  page.value = 1
+})
+
+watch(totalPages, () => {
+  if (page.value > totalPages.value) {
+    page.value = totalPages.value
+  }
+})
 
 const Pager = defineComponent({
-  props: { total: Number, page: Number, totalPages: Number },
+  props: { total: Number, page: Number, totalPages: Number, label: String },
   emits: ['prev', 'next'],
   setup(props, { emit }) {
     return () => h('div', { class: 'actions', style: 'justify-content: space-between;' }, [
-      h('div', { style: 'color:var(--muted)' }, `共 ${props.total} 条`),
+      h('div', { style: 'color:var(--muted)' }, `本日 ${props.total} 条`),
       h('div', { class: 'actions' }, [
         h('button', { class: 'btn-ghost', disabled: props.page === 1, onClick: () => emit('prev') }, '上一页'),
-        h('div', `第 ${props.page} / ${props.totalPages} 页`),
+        h('div', props.label),
         h('button', { class: 'btn-ghost', disabled: props.page === props.totalPages, onClick: () => emit('next') }, '下一页')
       ])
     ])

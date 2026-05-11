@@ -3,11 +3,16 @@ package com.hrm.service.impl;
 import com.hrm.common.constant.ErrorCode;
 import com.hrm.common.exception.BizException;
 import com.hrm.domain.Employee;
+import com.hrm.domain.SysUser;
 import com.hrm.dto.EmployeeCreateRequest;
 import com.hrm.dto.EmployeeUpdateRequest;
+import com.hrm.dto.EmployeeView;
 import com.hrm.mapper.EmployeeMapper;
+import com.hrm.mapper.SysUserMapper;
 import com.hrm.service.AuditLogService;
+import com.hrm.service.EmployeeAccountService;
 import com.hrm.service.EmployeeService;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -15,16 +20,36 @@ import org.springframework.stereotype.Service;
 public class EmployeeServiceImpl implements EmployeeService {
 
 	private final EmployeeMapper employeeMapper;
+	private final SysUserMapper sysUserMapper;
+	private final EmployeeAccountService employeeAccountService;
 	private final AuditLogService auditLogService;
 
-	public EmployeeServiceImpl(EmployeeMapper employeeMapper, AuditLogService auditLogService) {
+	public EmployeeServiceImpl(EmployeeMapper employeeMapper,
+							   SysUserMapper sysUserMapper,
+							   EmployeeAccountService employeeAccountService,
+							   AuditLogService auditLogService) {
 		this.employeeMapper = employeeMapper;
+		this.sysUserMapper = sysUserMapper;
+		this.employeeAccountService = employeeAccountService;
 		this.auditLogService = auditLogService;
 	}
 
 	@Override
 	public List<Employee> list() {
 		return employeeMapper.findAll();
+	}
+
+	@Override
+	public List<EmployeeView> listViews() {
+		List<EmployeeView> views = new ArrayList<>();
+		for (Employee employee : employeeMapper.findAll()) {
+			SysUser user = employee.getEmpNo() == null ? null : sysUserMapper.findByUsername(employeeAccountService.accountUsername(employee));
+			if (user == null && employee.getId() != null) {
+				user = sysUserMapper.findByEmpId(employee.getId());
+			}
+			views.add(EmployeeView.from(employee, user == null ? null : user.getUsername()));
+		}
+		return views;
 	}
 
 	@Override
@@ -49,7 +74,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 		employee.setHireDate(request.getHireDate());
 		employee.setStatus(request.getStatus() == null ? "ACTIVE" : request.getStatus());
 		employee.setBaseSalary(request.getBaseSalary());
+		employeeAccountService.normalizeEmployeeNumber(employee);
 		employeeMapper.insert(employee);
+		employeeAccountService.ensureEmployeeAccount(employee);
 		auditLogService.record("员工", "新增", "employee", employee.getId(), employee.getName());
 		return employee;
 	}

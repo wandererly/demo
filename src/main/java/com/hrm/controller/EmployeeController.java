@@ -4,6 +4,7 @@ import com.hrm.common.api.ApiResponse;
 import com.hrm.domain.Employee;
 import com.hrm.dto.EmployeeCreateRequest;
 import com.hrm.dto.EmployeeUpdateRequest;
+import com.hrm.dto.EmployeeView;
 import com.hrm.service.EmployeeService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -31,8 +32,8 @@ public class EmployeeController {
 	}
 
 	@GetMapping
-	public ApiResponse<List<Employee>> list() {
-		return ApiResponse.ok(employeeService.list());
+	public ApiResponse<List<EmployeeView>> list() {
+		return ApiResponse.ok(employeeService.listViews());
 	}
 
 	@GetMapping("/{id}")

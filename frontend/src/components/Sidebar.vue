@@ -1,11 +1,10 @@
 <template>
   <aside class="sidebar">
     <div class="brand">
-      <div class="brand-badge" aria-label="HRM">
-        <span class="brand-node brand-node-main"></span>
-        <span class="brand-node brand-node-a"></span>
-        <span class="brand-node brand-node-b"></span>
-        <span class="brand-node brand-node-c"></span>
+      <div class="auth-mark brand-mark" aria-label="HRM">
+        <span class="auth-mark-core"></span>
+        <span class="auth-mark-orbit auth-mark-orbit-a"></span>
+        <span class="auth-mark-orbit auth-mark-orbit-b"></span>
       </div>
       <div>
         <div style="font-weight:700">HRM Admin</div>

@@ -15,6 +15,7 @@ import com.hrm.domain.PerformanceReview;
 import com.hrm.domain.PerformanceRule;
 import com.hrm.domain.PromotionPath;
 import com.hrm.domain.SalaryStructure;
+import com.hrm.domain.SysUser;
 import com.hrm.dto.PayrollGenerateRequest;
 import com.hrm.mapper.AttendanceRecordMapper;
 import com.hrm.mapper.DepartmentMapper;
@@ -32,6 +33,8 @@ import com.hrm.mapper.PerformanceReviewMapper;
 import com.hrm.mapper.PerformanceRuleMapper;
 import com.hrm.mapper.PromotionPathMapper;
 import com.hrm.mapper.SalaryStructureMapper;
+import com.hrm.mapper.SysUserMapper;
+import com.hrm.service.EmployeeAccountService;
 import com.hrm.service.PayrollService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -42,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -63,6 +67,9 @@ public class DemoDataService {
 	private final PerformanceIndicatorMapper performanceIndicatorMapper;
 	private final PerformanceReviewMapper performanceReviewMapper;
 	private final PayrollRecordMapper payrollRecordMapper;
+	private final SysUserMapper sysUserMapper;
+	private final EmployeeAccountService employeeAccountService;
+	private final PasswordEncoder passwordEncoder;
 	private final PayrollService payrollService;
 
 	public DemoDataService(DepartmentMapper departmentMapper,
@@ -81,6 +88,9 @@ public class DemoDataService {
 						 PerformanceIndicatorMapper performanceIndicatorMapper,
 						 PerformanceReviewMapper performanceReviewMapper,
 						 PayrollRecordMapper payrollRecordMapper,
+						 SysUserMapper sysUserMapper,
+						 EmployeeAccountService employeeAccountService,
+						 PasswordEncoder passwordEncoder,
 						 PayrollService payrollService) {
 		this.departmentMapper = departmentMapper;
 		this.employeeMapper = employeeMapper;
@@ -98,6 +108,9 @@ public class DemoDataService {
 		this.performanceIndicatorMapper = performanceIndicatorMapper;
 		this.performanceReviewMapper = performanceReviewMapper;
 		this.payrollRecordMapper = payrollRecordMapper;
+		this.sysUserMapper = sysUserMapper;
+		this.employeeAccountService = employeeAccountService;
+		this.passwordEncoder = passwordEncoder;
 		this.payrollService = payrollService;
 	}
 
@@ -109,6 +122,7 @@ public class DemoDataService {
 		ensurePromotionPaths();
 
 		List<Employee> employees = ensureEmployees(departments);
+		ensureDemoUsers(employees);
 		ensureSalaryStructures(employees);
 		ensureAttendance(employees);
 		ensureLeaves(employees);
@@ -263,6 +277,45 @@ public class DemoDataService {
 			structure.setHousingFund(BigDecimal.valueOf(500));
 			structure.setTaxRate(BigDecimal.valueOf(0.1));
 			salaryStructureMapper.insert(structure);
+		}
+	}
+
+	private void ensureDemoUsers(List<Employee> employees) {
+		if (employees == null || employees.isEmpty()) {
+			return;
+		}
+		for (Employee employee : employees) {
+			employeeAccountService.ensureEmployeeAccount(employee);
+		}
+		ensureDemoUser("employee", "emp123", "EMPLOYEE", employees.get(0).getId());
+		if (employees.size() > 1) {
+			ensureDemoUser("manager", "mgr123", "HR", employees.get(1).getId());
+		}
+	}
+
+	private void ensureDemoUser(String username, String password, String role, Long empId) {
+		SysUser user = sysUserMapper.findByUsername(username);
+		if (user == null) {
+			user = new SysUser();
+			user.setUsername(username);
+			user.setPasswordHash(passwordEncoder.encode(password));
+			user.setRole(role);
+			user.setEmpId(empId);
+			user.setStatus("ACTIVE");
+			sysUserMapper.insert(user);
+			return;
+		}
+		boolean changed = false;
+		if (user.getEmpId() == null && empId != null) {
+			user.setEmpId(empId);
+			changed = true;
+		}
+		if (user.getRole() == null || user.getRole().isBlank()) {
+			user.setRole(role);
+			changed = true;
+		}
+		if (changed) {
+			sysUserMapper.update(user);
 		}
 	}
 

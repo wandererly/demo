@@ -5,7 +5,8 @@
       <div class="form-grid">
         <input class="input" v-model="userForm.username" placeholder="用户名" />
         <input class="input" v-model="userForm.passwordHash" placeholder="密码(可直接填明文)" />
-        <input class="input" v-model="userForm.role" placeholder="角色(ADMIN/HR)" />
+        <input class="input" v-model="userForm.role" placeholder="角色(ADMIN/HR/EMPLOYEE)" />
+        <input class="input" type="number" v-model="userForm.empId" placeholder="绑定员工ID" />
         <input class="input" v-model="userForm.status" placeholder="状态" />
       </div>
       <div class="actions">
@@ -21,6 +22,7 @@
         <input class="input" v-model="userEdit.username" placeholder="用户名" />
         <input class="input" v-model="userEdit.passwordHash" placeholder="密码" />
         <input class="input" v-model="userEdit.role" placeholder="角色" />
+        <input class="input" type="number" v-model="userEdit.empId" placeholder="绑定员工ID" />
         <input class="input" v-model="userEdit.status" placeholder="状态" />
       </div>
       <div class="actions">
@@ -86,6 +88,7 @@
             <th>ID</th>
             <th>用户名</th>
             <th>角色</th>
+            <th>员工ID</th>
             <th>状态</th>
           </tr>
         </thead>
@@ -94,6 +97,7 @@
             <td>{{ item.id }}</td>
             <td>{{ item.username }}</td>
             <td>{{ item.role }}</td>
+            <td>{{ item.empId || '-' }}</td>
             <td>{{ item.status }}</td>
           </tr>
         </tbody>
@@ -178,8 +182,8 @@ const roles = ref([])
 const permissions = ref([])
 const rolePerms = ref([])
 
-const userForm = ref({ username: '', passwordHash: '', role: '', status: '' })
-const userEdit = ref({ id: '', username: '', passwordHash: '', role: '', status: '' })
+const userForm = ref({ username: '', passwordHash: '', role: '', empId: '', status: '' })
+const userEdit = ref({ id: '', username: '', passwordHash: '', role: '', empId: '', status: '' })
 const roleForm = ref({ roleName: '', roleKey: '' })
 const roleEdit = ref({ id: '', roleName: '', roleKey: '' })
 const permForm = ref({ permKey: '', permName: '' })
@@ -253,9 +257,10 @@ const createUser = async () => {
       username: userForm.value.username,
       passwordHash: userForm.value.passwordHash,
       role: userForm.value.role || null,
+      empId: userForm.value.empId ? Number(userForm.value.empId) : null,
       status: userForm.value.status || null
     })
-    userForm.value = { username: '', passwordHash: '', role: '', status: '' }
+    userForm.value = { username: '', passwordHash: '', role: '', empId: '', status: '' }
     await loadUsers()
   } catch (e) {
     error.value = e.message
@@ -269,6 +274,7 @@ const updateUser = async () => {
       username: userEdit.value.username || null,
       passwordHash: userEdit.value.passwordHash || null,
       role: userEdit.value.role || null,
+      empId: userEdit.value.empId ? Number(userEdit.value.empId) : null,
       status: userEdit.value.status || null
     })
     await loadUsers()

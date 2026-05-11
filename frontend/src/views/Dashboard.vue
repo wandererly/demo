@@ -39,7 +39,7 @@
       </router-link>
     </section>
 
-    <section class="grid grid-2 report-grid">
+    <section class="grid workbench-detail-grid report-grid">
       <div class="card">
         <h3>今日考勤异常</h3>
         <table v-if="todayExceptions.length" class="table">

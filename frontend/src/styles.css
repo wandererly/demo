@@ -45,79 +45,37 @@ h1, h2, h3 {
   margin-bottom: 32px;
 }
 
-.brand-badge {
-  position: relative;
+.brand-mark {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+}
+
+.brand-mark::before {
   width: 52px;
   height: 52px;
-  flex: 0 0 auto;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background:
-    radial-gradient(circle at 28% 24%, rgba(242, 183, 5, 0.42), transparent 22px),
-    linear-gradient(135deg, #1f8a70 0%, #1aa6b7 100%);
-  box-shadow: 0 16px 34px rgba(31, 138, 112, 0.28), inset 0 0 20px rgba(255,255,255,0.12);
-  overflow: hidden;
 }
 
-.brand-badge::before,
-.brand-badge::after {
-  content: "";
-  position: absolute;
-  left: 15px;
+.brand-mark::after {
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+}
+
+.brand-mark .auth-mark-core {
+  width: 9px;
+  height: 9px;
+}
+
+.brand-mark .auth-mark-orbit-a {
+  width: 56px;
+  height: 23px;
+}
+
+.brand-mark .auth-mark-orbit-b {
   width: 23px;
-  height: 1px;
-  background: rgba(255,255,255,0.58);
-  transform-origin: left center;
-}
-
-.brand-badge::before {
-  top: 22px;
-  transform: rotate(-28deg);
-}
-
-.brand-badge::after {
-  top: 30px;
-  transform: rotate(28deg);
-}
-
-.brand-node {
-  position: absolute;
-  z-index: 1;
-  display: block;
-  border-radius: 999px;
-  background: #f7f2e9;
-  box-shadow: 0 0 14px rgba(255,255,255,0.46);
-}
-
-.brand-node-main {
-  left: 13px;
-  top: 21px;
-  width: 10px;
-  height: 10px;
-  background: #072015;
-  border: 2px solid #f7f2e9;
-}
-
-.brand-node-a {
-  right: 12px;
-  top: 12px;
-  width: 9px;
-  height: 9px;
-}
-
-.brand-node-b {
-  right: 11px;
-  top: 31px;
-  width: 9px;
-  height: 9px;
-}
-
-.brand-node-c {
-  left: 25px;
-  top: 23px;
-  width: 6px;
-  height: 6px;
-  opacity: 0.82;
+  height: 56px;
 }
 
 .nav-group {
@@ -204,12 +162,21 @@ h1, h2, h3 {
 
 .workbench-grid {
   margin-top: 18px;
+  align-items: stretch;
 }
 
 .action-card {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   color: inherit;
   text-decoration: none;
   transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.action-card h2 {
+  margin: 18px 0 10px;
 }
 
 .action-card:hover {
@@ -227,6 +194,11 @@ h1, h2, h3 {
 
 .card + .card {
   margin-top: 18px;
+}
+
+.grid > .card + .card,
+.grid > .action-card + .action-card {
+  margin-top: 0;
 }
 
 .badge {
@@ -430,6 +402,37 @@ h1, h2, h3 {
   color: var(--muted);
 }
 
+.lifecycle-grid {
+  align-items: stretch;
+}
+
+.lifecycle-list-card {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.lifecycle-list-card h3 {
+  margin-top: 0;
+}
+
+.lifecycle-table {
+  margin-top: 8px;
+  table-layout: fixed;
+}
+
+.lifecycle-table th,
+.lifecycle-table td {
+  height: 52px;
+  vertical-align: middle;
+}
+
+.lifecycle-list-card .empty-state {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
 .table-note {
   margin-top: 12px;
   padding: 10px 12px;
@@ -483,6 +486,28 @@ h1, h2, h3 {
 
 .report-grid {
   margin-top: 18px;
+  align-items: stretch;
+}
+
+.workbench-detail-grid {
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+}
+
+.workbench-detail-grid > .card {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+}
+
+.workbench-detail-grid > .card .table,
+.workbench-detail-grid > .card .bar-list {
+  margin-top: 12px;
+}
+
+.workbench-detail-grid > .card .empty-state {
+  flex: 1;
+  display: grid;
+  place-items: center;
 }
 
 .metric-card h2 {
@@ -770,6 +795,27 @@ h1, h2, h3 {
   color: rgba(238,247,255,0.64);
   font-size: 14px;
   margin-top: 4px;
+}
+
+.demo-account-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.demo-account-row button {
+  min-height: 38px;
+  border: 1px solid rgba(140, 225, 196, 0.22);
+  border-radius: 10px;
+  color: rgba(238,247,255,0.78);
+  background: rgba(255,255,255,0.07);
+  cursor: pointer;
+}
+
+.demo-account-row button:hover {
+  color: #ffffff;
+  border-color: rgba(140, 225, 196, 0.48);
+  background: rgba(31, 138, 112, 0.18);
 }
 
 .auth-input {

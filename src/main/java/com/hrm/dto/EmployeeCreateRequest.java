@@ -10,7 +10,6 @@ import lombok.Data;
 
 @Data
 public class EmployeeCreateRequest {
-	@NotBlank(message = "工号不能为空")
 	private String empNo;
 	@NotBlank(message = "姓名不能为空")
 	private String name;

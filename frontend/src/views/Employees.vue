@@ -4,7 +4,7 @@
       <h3>新增员工</h3>
       <p style="color:var(--muted)">录入基本信息与入职信息</p>
       <div class="form-grid">
-        <input class="input" v-model="form.empNo" placeholder="员工编号" required />
+        <input class="input" v-model="form.empNo" placeholder="员工编号(留空自动生成)" />
         <input class="input" v-model="form.name" placeholder="姓名" required />
         <select class="input" v-model="form.gender">
           <option value="">请选择性别</option>
@@ -70,6 +70,7 @@
           <tr>
             <th>ID</th>
             <th>姓名</th>
+            <th>员工账号</th>
             <th>部门</th>
             <th>岗位</th>
             <th>状态</th>
@@ -80,6 +81,7 @@
           <tr v-for="item in pagedList" :key="item.id">
             <td>{{ item.id }}</td>
             <td>{{ item.name }}</td>
+            <td>{{ item.accountUsername || '未生成' }}</td>
             <td>{{ departmentName(item.deptId) }}</td>
             <td>{{ item.position }}</td>
             <td>{{ statusLabel(item.status) }}</td>
@@ -158,10 +160,10 @@
       <div v-if="lifecycleInfo" class="badge">{{ lifecycleInfo }}</div>
     </section>
 
-    <section class="grid grid-2">
-      <div class="card">
+    <section class="grid grid-2 lifecycle-grid">
+      <div class="card lifecycle-list-card">
         <h3>合同列表</h3>
-        <table class="table" v-if="contracts.length">
+        <table class="table lifecycle-table" v-if="contracts.length">
           <thead><tr><th>员工</th><th>编号</th><th>类型</th><th>开始</th><th>结束</th><th>状态</th></tr></thead>
           <tbody>
             <tr v-for="item in contracts.slice(0, 8)" :key="item.id">
@@ -176,9 +178,9 @@
         </table>
         <div v-else class="empty-state compact">暂无合同记录</div>
       </div>
-      <div class="card">
+      <div class="card lifecycle-list-card">
         <h3>生命周期记录</h3>
-        <table class="table" v-if="lifecycleEvents.length">
+        <table class="table lifecycle-table" v-if="lifecycleEvents.length">
           <thead><tr><th>员工</th><th>类型</th><th>生效日期</th><th>状态</th></tr></thead>
           <tbody>
             <tr v-for="item in lifecycleEvents.slice(0, 8)" :key="item.id">
@@ -278,13 +280,13 @@ const loadLifecycle = async () => {
 
 const create = async () => {
   error.value = ''
-  if (!form.value.empNo.trim() || !form.value.name.trim()) {
-    error.value = '员工编号和姓名为必填项'
+  if (!form.value.name.trim()) {
+    error.value = '姓名为必填项'
     return
   }
   try {
     await http.post('/api/employees', {
-      empNo: form.value.empNo.trim(),
+      empNo: form.value.empNo.trim() || null,
       name: form.value.name.trim(),
       gender: form.value.gender || null,
       phone: form.value.phone || null,

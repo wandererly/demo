@@ -26,8 +26,13 @@
 
         <div v-if="mode === 'login'" class="auth-form">
           <div>
-            <div class="login-title">管理员登录</div>
-            <div class="login-sub">输入账号、密码和验证码进入系统</div>
+            <div class="login-title">账号登录</div>
+            <div class="login-sub">管理员进入管理后台，员工进入员工自助</div>
+          </div>
+
+          <div class="demo-account-row">
+            <button type="button" @click="fillDemo('admin')">管理员 admin / admin123</button>
+            <button type="button" @click="fillDemo('employee')">员工 e1001 / E1001@123</button>
           </div>
 
           <input class="input auth-input" v-model="form.username" placeholder="用户名" autocomplete="username" />
@@ -117,6 +122,16 @@ const switchMode = (nextMode) => {
   mode.value = nextMode
   error.value = ''
   registerMsg.value = ''
+}
+
+const fillDemo = (type) => {
+  if (type === 'employee') {
+    form.value.username = 'e1001'
+    form.value.password = 'E1001@123'
+    return
+  }
+  form.value.username = 'admin'
+  form.value.password = 'admin123'
 }
 
 const refreshCaptcha = async () => {

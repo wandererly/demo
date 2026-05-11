@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -33,6 +34,9 @@ public interface EmployeeMapper {
 			+ "position = #{position}, hire_date = #{hireDate}, status = #{status}, base_salary = #{baseSalary}, updated_at = now() "
 			+ "where id = #{id}")
 	int update(Employee employee);
+
+	@Update("update employee set emp_no = #{empNo}, updated_at = now() where id = #{id}")
+	int updateEmpNo(@Param("id") Long id, @Param("empNo") String empNo);
 
 	@Delete("delete from employee where id = #{id}")
 	int delete(Long id);

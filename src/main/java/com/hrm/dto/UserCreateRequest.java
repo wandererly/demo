@@ -10,5 +10,6 @@ public class UserCreateRequest {
 	@NotBlank(message = "Password hash is required")
 	private String passwordHash;
 	private String role;
+	private Long empId;
 	private String status;
 }
