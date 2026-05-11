@@ -75,7 +75,7 @@ public class PerformanceController {
 
 	@PutMapping("/indicators/{id}")
 	public ApiResponse<PerformanceIndicator> updateIndicator(@PathVariable Long id,
-									  @RequestBody PerformanceIndicatorUpdateRequest request) {
+									  @Valid @RequestBody PerformanceIndicatorUpdateRequest request) {
 		return ApiResponse.ok(performanceService.updateIndicator(id, request));
 	}
 
@@ -97,7 +97,7 @@ public class PerformanceController {
 
 	@PutMapping("/reviews/{id}")
 	public ApiResponse<PerformanceReview> updateReview(@PathVariable Long id,
-									  @RequestBody PerformanceReviewUpdateRequest request) {
+									  @Valid @RequestBody PerformanceReviewUpdateRequest request) {
 		return ApiResponse.ok(performanceService.updateReview(id, request));
 	}
 	@PostMapping("/reviews/{id}/approve")

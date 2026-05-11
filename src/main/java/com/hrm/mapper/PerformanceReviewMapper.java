@@ -11,6 +11,9 @@ import org.apache.ibatis.annotations.Update;
 @Mapper
 public interface PerformanceReviewMapper {
 
+	@Select("select id, emp_id, cycle_id, score, level, reviewer_id, goal_summary, approval_status, approver_id, approved_at, comment, created_at from performance_review order by id desc")
+	List<PerformanceReview> findAll();
+
 	@Select("select id, emp_id, cycle_id, score, level, reviewer_id, goal_summary, approval_status, approver_id, approved_at, comment, created_at from performance_review where cycle_id = #{cycleId} order by id desc")
 	List<PerformanceReview> findByCycleId(Long cycleId);
 

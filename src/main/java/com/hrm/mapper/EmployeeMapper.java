@@ -20,6 +20,10 @@ public interface EmployeeMapper {
 			+ "from employee where id = #{id}")
 	Employee findById(Long id);
 
+	@Select("select id, emp_no, name, gender, phone, email, dept_id, position, hire_date, status, base_salary, created_at, updated_at "
+			+ "from employee where dept_id = #{deptId} order by id desc")
+	List<Employee> findByDeptId(Long deptId);
+
 	@Insert("insert into employee(emp_no, name, gender, phone, email, dept_id, position, hire_date, status, base_salary, created_at, updated_at) "
 			+ "values(#{empNo}, #{name}, #{gender}, #{phone}, #{email}, #{deptId}, #{position}, #{hireDate}, #{status}, #{baseSalary}, now(), now())")
 	@Options(useGeneratedKeys = true, keyProperty = "id")

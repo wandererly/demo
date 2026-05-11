@@ -17,7 +17,7 @@
     <section class="card">
       <h3>编辑用户</h3>
       <div class="form-grid">
-        <input class="input" v-model="userEdit.id" placeholder="用户ID" />
+        <input class="input" type="number" v-model="userEdit.id" placeholder="用户ID" />
         <input class="input" v-model="userEdit.username" placeholder="用户名" />
         <input class="input" v-model="userEdit.passwordHash" placeholder="密码" />
         <input class="input" v-model="userEdit.role" placeholder="角色" />
@@ -43,7 +43,7 @@
     <section class="card">
       <h3>编辑角色</h3>
       <div class="form-grid">
-        <input class="input" v-model="roleEdit.id" placeholder="角色ID" />
+        <input class="input" type="number" v-model="roleEdit.id" placeholder="角色ID" />
         <input class="input" v-model="roleEdit.roleName" placeholder="角色名称" />
         <input class="input" v-model="roleEdit.roleKey" placeholder="角色标识" />
       </div>

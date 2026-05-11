@@ -9,6 +9,7 @@ public class SysUser {
 	private String username;
 	private String passwordHash;
 	private String role;
+	private Long empId;
 	private String status;
 	private LocalDateTime createdAt;
 }

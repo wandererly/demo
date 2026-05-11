@@ -1,36 +1,52 @@
 <template>
   <aside class="sidebar">
     <div class="brand">
-      <div class="brand-badge">HR</div>
+      <div class="brand-badge" aria-label="HRM">
+        <span class="brand-node brand-node-main"></span>
+        <span class="brand-node brand-node-a"></span>
+        <span class="brand-node brand-node-b"></span>
+        <span class="brand-node brand-node-c"></span>
+      </div>
       <div>
         <div style="font-weight:700">HRM Admin</div>
         <div style="font-size:12px;color:#a6b0b8">Enterprise Suite</div>
       </div>
     </div>
 
-    <div class="nav-group">概览</div>
-    <router-link to="/" class="nav-link" active-class="active">仪表盘</router-link>
-    <router-link v-if="hasPerm('hr:manage')" to="/departments" class="nav-link" active-class="active">部门管理</router-link>
-    <router-link v-if="hasPerm('hr:manage')" to="/employees" class="nav-link" active-class="active">员工管理</router-link>
+    <template v-if="showAdmin">
+      <div class="nav-group">管理后台</div>
+      <router-link to="/" class="nav-link" active-class="active">工作台</router-link>
+      <router-link v-if="hasPerm('hr:manage')" to="/employees" class="nav-link" active-class="active">员工管理</router-link>
+      <router-link v-if="hasPerm('hr:manage')" to="/departments" class="nav-link" active-class="active">部门岗位</router-link>
+      <router-link v-if="hasPerm('attendance:manage')" to="/attendance" class="nav-link" active-class="active">考勤管理</router-link>
+      <router-link v-if="hasPerm('payroll:manage')" to="/payroll" class="nav-link" active-class="active">薪酬管理</router-link>
+      <router-link v-if="hasPerm('approval:manage')" to="/approvals" class="nav-link" active-class="active">统一审批</router-link>
+      <router-link v-if="hasAnyPerm(['report:view','hr:manage','payroll:manage'])" to="/reports" class="nav-link" active-class="active">报表</router-link>
+      <router-link v-if="hasPerm('config:manage')" to="/settings" class="nav-link" active-class="active">系统设置</router-link>
+    </template>
 
-    <div class="nav-group">考勤</div>
-    <router-link v-if="hasPerm('attendance:manage')" to="/attendance" class="nav-link" active-class="active">考勤管理</router-link>
-    <router-link v-if="hasPerm('leave:manage')" to="/leave" class="nav-link" active-class="active">请假管理</router-link>
+    <template v-if="showSelf">
+      <div class="nav-group">员工自助</div>
+      <router-link to="/self/profile" class="nav-link" active-class="active">我的档案</router-link>
+      <router-link to="/self/attendance" class="nav-link" active-class="active">我的考勤</router-link>
+      <router-link to="/self/leave" class="nav-link" active-class="active">我的请假</router-link>
+      <router-link to="/self/performance" class="nav-link" active-class="active">我的绩效</router-link>
+      <router-link to="/self/payslips" class="nav-link" active-class="active">我的工资条</router-link>
+      <router-link to="/self/notifications" class="nav-link" active-class="active">我的通知</router-link>
+    </template>
 
-    <div class="nav-group">绩效与薪酬</div>
-    <router-link v-if="hasPerm('perf:manage')" to="/performance" class="nav-link" active-class="active">绩效管理</router-link>
-    <router-link v-if="hasPerm('payroll:manage')" to="/payroll" class="nav-link" active-class="active">薪酬管理</router-link>
-
-    <div class="nav-group">系统</div>
-    <router-link v-if="hasPerm('rbac:manage')" to="/rbac" class="nav-link" active-class="active">权限管理</router-link>
-    <router-link v-if="hasPerm('config:manage')" to="/settings" class="nav-link" active-class="active">系统设置</router-link>
   </aside>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { getPermissions } from '../auth'
+import { getPermissions, getUser } from '../auth'
 
 const permissions = computed(() => getPermissions())
+const user = computed(() => getUser() || {})
 const hasPerm = (key) => permissions.value.includes(key)
+const hasAnyPerm = (keys) => keys.some((key) => hasPerm(key))
+const adminPerms = ['hr:manage', 'attendance:manage', 'leave:manage', 'perf:manage', 'payroll:manage', 'approval:manage', 'report:view', 'config:manage', 'rbac:manage']
+const showAdmin = computed(() => adminPerms.some((key) => hasPerm(key)))
+const showSelf = computed(() => !showAdmin.value && (user.value.empId || user.value.role === 'EMPLOYEE' || hasPerm('self:view')))
 </script>

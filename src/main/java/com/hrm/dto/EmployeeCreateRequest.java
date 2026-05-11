@@ -3,6 +3,7 @@ package com.hrm.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class EmployeeCreateRequest {
 	private LocalDate hireDate;
 	private String status;
 	@NotNull(message = "基础薪资不能为空")
+	@DecimalMin(value = "3500.00", message = "基础薪资不能低于3500")
 	private BigDecimal baseSalary;
 }
 

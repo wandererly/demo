@@ -12,11 +12,20 @@ import org.apache.ibatis.annotations.Update;
 @Mapper
 public interface AttendanceRecordMapper {
 
-	@Select("select id, emp_id, work_date, check_in, check_out, status, created_at from attendance_record order by id desc")
+	@Select("select id, emp_id, work_date, check_in, check_out, status, created_at from attendance_record order by work_date desc, emp_id asc, id desc")
 	List<AttendanceRecord> findAll();
 
 	@Select("select id, emp_id, work_date, check_in, check_out, status, created_at from attendance_record where id = #{id}")
 	AttendanceRecord findById(Long id);
+
+	@Select("select id, emp_id, work_date, check_in, check_out, status, created_at "
+			+ "from attendance_record where emp_id = #{empId} order by work_date desc, id desc")
+	List<AttendanceRecord> findByEmpId(Long empId);
+
+	@Select("select id, emp_id, work_date, check_in, check_out, status, created_at "
+			+ "from attendance_record where emp_id = #{empId} and work_date = #{workDate} order by id desc limit 1")
+	AttendanceRecord findByEmpIdAndWorkDate(@org.apache.ibatis.annotations.Param("empId") Long empId,
+										 @org.apache.ibatis.annotations.Param("workDate") java.time.LocalDate workDate);
 
 	@Insert("insert into attendance_record(emp_id, work_date, check_in, check_out, status, created_at) "
 			+ "values(#{empId}, #{workDate}, #{checkIn}, #{checkOut}, #{status}, now())")

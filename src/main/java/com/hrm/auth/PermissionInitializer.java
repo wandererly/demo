@@ -32,6 +32,7 @@ public class PermissionInitializer implements CommandLineRunner {
 
 		SysRole admin = ensureRole("ADMIN", "系统管理员");
 		SysRole hr = ensureRole("HR", "人事专员");
+		SysRole employee = ensureRole("EMPLOYEE", "普通员工");
 
 		String[][] perms = new String[][] {
 				{"rbac:manage", "权限管理"},
@@ -40,7 +41,10 @@ public class PermissionInitializer implements CommandLineRunner {
 				{"attendance:manage", "考勤管理"},
 				{"leave:manage", "请假管理"},
 				{"perf:manage", "绩效管理"},
-				{"payroll:manage", "薪酬管理"}
+				{"payroll:manage", "薪酬管理"},
+				{"approval:manage", "统一审批"},
+				{"audit:view", "审计日志"},
+				{"report:view", "报表查看"}
 		};
 
 		for (String[] p : perms) {
@@ -55,6 +59,8 @@ public class PermissionInitializer implements CommandLineRunner {
 			Permission permission = ensurePermission(p[0], p[1]);
 			assignIfMissing(hr, permission);
 		}
+
+		assignIfMissing(employee, ensurePermission("self:view", "员工自助"));
 	}
 
 	private SysRole ensureRole(String key, String name) {

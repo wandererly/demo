@@ -9,6 +9,7 @@ import com.hrm.dto.LeaveCreateRequest;
 import com.hrm.dto.LeaveUpdateRequest;
 import com.hrm.mapper.LeaveRequestMapper;
 import com.hrm.mapper.LeaveRuleMapper;
+import com.hrm.service.AuditLogService;
 import com.hrm.service.LeaveService;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,13 @@ public class LeaveServiceImpl implements LeaveService {
 
 	private final LeaveRequestMapper leaveRequestMapper;
 	private final LeaveRuleMapper leaveRuleMapper;
+	private final AuditLogService auditLogService;
 
-	public LeaveServiceImpl(LeaveRequestMapper leaveRequestMapper, LeaveRuleMapper leaveRuleMapper) {
+	public LeaveServiceImpl(LeaveRequestMapper leaveRequestMapper, LeaveRuleMapper leaveRuleMapper,
+						 AuditLogService auditLogService) {
 		this.leaveRequestMapper = leaveRequestMapper;
 		this.leaveRuleMapper = leaveRuleMapper;
+		this.auditLogService = auditLogService;
 	}
 
 	@Override
@@ -59,6 +63,7 @@ public class LeaveServiceImpl implements LeaveService {
 			entity.setStatus("PENDING");
 		}
 		leaveRequestMapper.insert(entity);
+		auditLogService.record("请假", "提交", "leave_request", entity.getId(), "员工ID " + entity.getEmpId());
 		return entity;
 	}
 
@@ -73,6 +78,7 @@ public class LeaveServiceImpl implements LeaveService {
 		existing.setStatus(request.getStatus() == null ? existing.getStatus() : request.getStatus());
 		existing.setApproverId(request.getApproverId() == null ? existing.getApproverId() : request.getApproverId());
 		leaveRequestMapper.update(existing);
+		auditLogService.record("请假", "更新", "leave_request", existing.getId(), "状态 " + existing.getStatus());
 		return existing;
 	}
 
@@ -89,6 +95,7 @@ public class LeaveServiceImpl implements LeaveService {
 		existing.setApproverId(request.getApproverId());
 		existing.setStatus(status);
 		leaveRequestMapper.updateStatus(existing);
+		auditLogService.record("请假", "审批", "leave_request", existing.getId(), "状态 " + existing.getStatus());
 		return existing;
 	}
 
@@ -98,5 +105,6 @@ public class LeaveServiceImpl implements LeaveService {
 		if (rows == 0) {
 			throw new BizException(ErrorCode.NOT_FOUND, "Leave request not found");
 		}
+		auditLogService.record("请假", "删除", "leave_request", id, null);
 	}
 }

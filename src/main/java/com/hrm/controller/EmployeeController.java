@@ -46,7 +46,7 @@ public class EmployeeController {
 	}
 
 	@PutMapping("/{id}")
-	public ApiResponse<Employee> update(@PathVariable Long id, @RequestBody EmployeeUpdateRequest request) {
+	public ApiResponse<Employee> update(@PathVariable Long id, @Valid @RequestBody EmployeeUpdateRequest request) {
 		return ApiResponse.ok(employeeService.update(id, request));
 	}
 

@@ -19,6 +19,7 @@
 	<properties>
 		<java.version>17</java.version>
 		<jjwt.version>0.11.5</jjwt.version>
+		<lombok.version>1.18.42</lombok.version>
 	</properties>
 
 	<dependencies>
@@ -51,6 +52,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -86,11 +88,13 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<release>17</release>
+					<fork>true</fork>
+					<executable>D:\java\bin\javac.exe</executable>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.34</version>
+							<version>${lombok.version}</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>

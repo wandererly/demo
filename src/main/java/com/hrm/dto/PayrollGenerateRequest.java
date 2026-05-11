@@ -1,22 +1,27 @@
 package com.hrm.dto;
 
 import java.math.BigDecimal;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class PayrollGenerateRequest {
-	@NotNull(message = "Employee ID is required")
+	@NotNull(message = "员工不能为空")
 	private Long empId;
-	@NotBlank(message = "Cycle month is required")
+	@NotBlank(message = "薪酬月份不能为空")
 	private String cycleMonth;
-	@NotNull(message = "Overtime hours is required")
+	@NotNull(message = "加班小时不能为空")
+	@DecimalMin(value = "0.00", message = "加班小时不能为负数")
 	private BigDecimal overtimeHours;
-	@NotNull(message = "Overtime rate is required")
+	@NotNull(message = "加班费率不能为空")
+	@DecimalMin(value = "0.00", message = "加班费率不能为负数")
 	private BigDecimal overtimeRate;
-	@NotNull(message = "Leave days is required")
+	@NotNull(message = "请假天数不能为空")
+	@DecimalMin(value = "0.00", message = "请假天数不能为负数")
 	private BigDecimal leaveDays;
-	@NotNull(message = "Leave deduction per day is required")
+	@NotNull(message = "日扣款不能为空")
+	@DecimalMin(value = "0.00", message = "日扣款不能为负数")
 	private BigDecimal leaveDeductionPerDay;
 }

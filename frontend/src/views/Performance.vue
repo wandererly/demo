@@ -4,8 +4,8 @@
       <h3>绩效周期</h3>
       <div class="form-grid">
         <input class="input" v-model="cycleForm.name" placeholder="周期名称" />
-        <input class="input" v-model="cycleForm.startDate" placeholder="开始日期 YYYYY-MM-DD" />
-        <input class="input" v-model="cycleForm.endDate" placeholder="结束日期 YYYYY-MM-DD" />
+        <input class="input" type="date" v-model="cycleForm.startDate" placeholder="开始日期" />
+        <input class="input" type="date" v-model="cycleForm.endDate" placeholder="结束日期" />
       </div>
       <div class="actions">
         <button class="btn" @click="createCycle">新增周期</button>
@@ -16,11 +16,11 @@
 
     <section class="card">
       <h3>编辑周期</h3>
+      <div v-if="cycleEdit.id" class="badge">当前周期 #{{ cycleEdit.id }}</div>
       <div class="form-grid">
-        <input class="input" v-model="cycleEdit.id" placeholder="周期ID" />
         <input class="input" v-model="cycleEdit.name" placeholder="周期名称" />
-        <input class="input" v-model="cycleEdit.startDate" placeholder="开始日期" />
-        <input class="input" v-model="cycleEdit.endDate" placeholder="结束日期" />
+        <input class="input" type="date" v-model="cycleEdit.startDate" placeholder="开始日期" />
+        <input class="input" type="date" v-model="cycleEdit.endDate" placeholder="结束日期" />
       </div>
       <div class="actions">
         <button class="btn" @click="updateCycle">更新周期</button>
@@ -30,9 +30,12 @@
     <section class="card">
       <h3>绩效指标</h3>
       <div class="form-grid">
-        <input class="input" v-model="indicatorForm.cycleId" placeholder="周期ID" />
+        <select class="input" v-model="indicatorForm.cycleId">
+          <option value="">请选择周期</option>
+          <option v-for="cycle in cycles" :key="cycle.id" :value="cycle.id">{{ cycle.name }}</option>
+        </select>
         <input class="input" v-model="indicatorForm.name" placeholder="指标名称" />
-        <input class="input" v-model="indicatorForm.weight" placeholder="权重" />
+        <input class="input" type="number" v-model="indicatorForm.weight" placeholder="权重%(0-100)" min="0" max="100" step="5" />
         <input class="input" v-model="indicatorForm.description" placeholder="说明" />
       </div>
       <div class="actions">
@@ -43,10 +46,10 @@
 
     <section class="card">
       <h3>编辑指标</h3>
+      <div v-if="indicatorEdit.id" class="badge">当前指标 #{{ indicatorEdit.id }}</div>
       <div class="form-grid">
-        <input class="input" v-model="indicatorEdit.id" placeholder="指标ID" />
         <input class="input" v-model="indicatorEdit.name" placeholder="指标名称" />
-        <input class="input" v-model="indicatorEdit.weight" placeholder="权重" />
+        <input class="input" type="number" v-model="indicatorEdit.weight" placeholder="权重%(0-100)" min="0" max="100" step="5" />
         <input class="input" v-model="indicatorEdit.description" placeholder="说明" />
       </div>
       <div class="actions">
@@ -57,11 +60,20 @@
     <section class="card">
       <h3>绩效评审</h3>
       <div class="form-grid">
-        <input class="input" v-model="reviewForm.empId" placeholder="员工ID" />
-        <input class="input" v-model="reviewForm.cycleId" placeholder="周期ID" />
-        <input class="input" v-model="reviewForm.score" placeholder="评分" />
+        <select class="input" v-model="reviewForm.empId">
+          <option value="">请选择员工</option>
+          <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ employeeLabel(emp) }}</option>
+        </select>
+        <select class="input" v-model="reviewForm.cycleId">
+          <option value="">请选择周期</option>
+          <option v-for="cycle in cycles" :key="cycle.id" :value="cycle.id">{{ cycle.name }}</option>
+        </select>
+        <input class="input" type="number" v-model="reviewForm.score" placeholder="评分(0-100)" min="0" max="100" step="1" />
         <input class="input" v-model="reviewForm.level" placeholder="等级(A/B/C)" />
-        <input class="input" v-model="reviewForm.reviewerId" placeholder="评审人ID" />
+        <select class="input" v-model="reviewForm.reviewerId">
+          <option value="">请选择评审人</option>
+          <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ employeeLabel(emp) }}</option>
+        </select>
         <input class="input" v-model="reviewForm.comment" placeholder="评语" />
       </div>
       <div class="actions">
@@ -72,11 +84,14 @@
 
     <section class="card">
       <h3>编辑评审</h3>
+      <div v-if="reviewEdit.id" class="badge">当前评审 #{{ reviewEdit.id }}</div>
       <div class="form-grid">
-        <input class="input" v-model="reviewEdit.id" placeholder="评审ID" />
-        <input class="input" v-model="reviewEdit.score" placeholder="评分" />
+        <input class="input" type="number" v-model="reviewEdit.score" placeholder="评分(0-100)" min="0" max="100" step="1" />
         <input class="input" v-model="reviewEdit.level" placeholder="等级" />
-        <input class="input" v-model="reviewEdit.reviewerId" placeholder="评审人ID" />
+        <select class="input" v-model="reviewEdit.reviewerId">
+          <option value="">请选择评审人</option>
+          <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ employeeLabel(emp) }}</option>
+        </select>
         <input class="input" v-model="reviewEdit.comment" placeholder="评语" />
       </div>
       <div class="actions">
@@ -130,7 +145,7 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>周期ID</th>
+            <th>周期</th>
             <th>名称</th>
             <th>权重</th>
             <th>说明</th>
@@ -140,7 +155,7 @@
         <tbody>
           <tr v-for="item in indicatorPaged" :key="item.id">
             <td>{{ item.id }}</td>
-            <td>{{ item.cycleId }}</td>
+            <td>{{ cycleName(item.cycleId) }}</td>
             <td>{{ item.name }}</td>
             <td>{{ item.weight }}</td>
             <td>{{ item.description }}</td>
@@ -167,22 +182,24 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>员工ID</th>
-            <th>周期ID</th>
+            <th>员工</th>
+            <th>周期</th>
             <th>评分</th>
             <th>等级</th>
             <th>评审人</th>
+            <th>审批</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="item in reviewPaged" :key="item.id">
             <td>{{ item.id }}</td>
-            <td>{{ item.empId }}</td>
-            <td>{{ item.cycleId }}</td>
+            <td>{{ employeeName(item.empId) }}</td>
+            <td>{{ cycleName(item.cycleId) }}</td>
             <td>{{ item.score }}</td>
             <td>{{ item.level }}</td>
-            <td>{{ item.reviewerId }}</td>
+            <td>{{ employeeName(item.reviewerId) }}</td>
+            <td>{{ statusText(item.approvalStatus) }}</td>
             <td><button class="btn-ghost" @click="pickReview(item)">编辑</button></td>
           </tr>
         </tbody>
@@ -206,6 +223,7 @@ import { http } from '../api/http'
 const cycles = ref([])
 const indicators = ref([])
 const reviews = ref([])
+const employees = ref([])
 const error = ref('')
 
 const cycleForm = ref({ name: '', startDate: '', endDate: '' })
@@ -243,7 +261,7 @@ const indicatorPaged = computed(() => indicatorFiltered.value.slice((indicatorPa
 const reviewFiltered = computed(() => {
   const key = reviewSearch.value.trim().toLowerCase()
   if (!key) return reviews.value
-  return reviews.value.filter((item) => `${item.empId || ''}${item.level || ''}`.toLowerCase().includes(key))
+  return reviews.value.filter((item) => `${employeeName(item.empId)}${cycleName(item.cycleId)}${item.level || ''}`.toLowerCase().includes(key))
 })
 const reviewPages = computed(() => Math.max(1, Math.ceil(reviewFiltered.value.length / pageSize)))
 const reviewPaged = computed(() => reviewFiltered.value.slice((reviewPage.value - 1) * pageSize, reviewPage.value * pageSize))
@@ -253,6 +271,12 @@ const loadCycles = async () => {
   try {
     cycles.value = await http.get('/api/performance/cycles')
     cyclePage.value = 1
+    if (!indicatorForm.value.cycleId && cycles.value.length) {
+      indicatorForm.value.cycleId = cycles.value[0].id
+    }
+    if (!reviewForm.value.cycleId && cycles.value.length) {
+      reviewForm.value.cycleId = cycles.value[0].id
+    }
   } catch (e) {
     error.value = e.message
   }
@@ -284,6 +308,10 @@ const pickCycle = (item) => {
 
 const updateCycle = async () => {
   error.value = ''
+  if (!cycleEdit.value.id) {
+    error.value = '请先从周期列表选择一条记录'
+    return
+  }
   try {
     await http.put(`/api/performance/cycles/${cycleEdit.value.id}`, {
       name: cycleEdit.value.name,
@@ -309,6 +337,10 @@ const loadIndicators = async () => {
 
 const createIndicator = async () => {
   error.value = ''
+  if (!indicatorForm.value.cycleId) {
+    error.value = '请选择周期'
+    return
+  }
   try {
     await http.post('/api/performance/indicators', {
       cycleId: indicatorForm.value.cycleId ? Number(indicatorForm.value.cycleId) : null,
@@ -316,7 +348,9 @@ const createIndicator = async () => {
       weight: indicatorForm.value.weight ? Number(indicatorForm.value.weight) : null,
       description: indicatorForm.value.description || null
     })
-    indicatorForm.value = { cycleId: '', name: '', weight: '', description: '' }
+    const cycleId = indicatorForm.value.cycleId
+    indicatorForm.value = { cycleId, name: '', weight: '', description: '' }
+    await loadIndicators()
   } catch (e) {
     error.value = e.message
   }
@@ -333,6 +367,10 @@ const pickIndicator = (item) => {
 
 const updateIndicator = async () => {
   error.value = ''
+  if (!indicatorEdit.value.id) {
+    error.value = '请先从指标列表选择一条记录'
+    return
+  }
   try {
     await http.put(`/api/performance/indicators/${indicatorEdit.value.id}`, {
       name: indicatorEdit.value.name || null,
@@ -358,6 +396,10 @@ const loadReviews = async () => {
 
 const createReview = async () => {
   error.value = ''
+  if (!reviewForm.value.empId || !reviewForm.value.cycleId) {
+    error.value = '请选择员工和周期'
+    return
+  }
   try {
     await http.post('/api/performance/reviews', {
       empId: reviewForm.value.empId ? Number(reviewForm.value.empId) : null,
@@ -367,7 +409,9 @@ const createReview = async () => {
       reviewerId: reviewForm.value.reviewerId ? Number(reviewForm.value.reviewerId) : null,
       comment: reviewForm.value.comment || null
     })
-    reviewForm.value = { empId: '', cycleId: '', score: '', level: '', reviewerId: '', comment: '' }
+    const cycleId = reviewForm.value.cycleId
+    reviewForm.value = { empId: '', cycleId, score: '', level: '', reviewerId: '', comment: '' }
+    await loadReviews()
   } catch (e) {
     error.value = e.message
   }
@@ -385,6 +429,10 @@ const pickReview = (item) => {
 
 const updateReview = async () => {
   error.value = ''
+  if (!reviewEdit.value.id) {
+    error.value = '请先从评审列表选择一条记录'
+    return
+  }
   try {
     await http.put(`/api/performance/reviews/${reviewEdit.value.id}`, {
       score: reviewEdit.value.score ? Number(reviewEdit.value.score) : null,
@@ -405,5 +453,29 @@ const nextIndicator = () => { if (indicatorPage.value < indicatorPages.value) in
 const prevReview = () => { if (reviewPage.value > 1) reviewPage.value -= 1 }
 const nextReview = () => { if (reviewPage.value < reviewPages.value) reviewPage.value += 1 }
 
-onMounted(loadCycles)
+const loadEmployees = async () => {
+  employees.value = await http.get('/api/employees').catch(() => [])
+}
+
+const employeeName = (id) => {
+  if (!id) return '-'
+  return employees.value.find((item) => String(item.id) === String(id))?.name || `员工 #${id}`
+}
+
+const employeeLabel = (employee) => `${employee.name}${employee.position ? `（${employee.position}）` : ''}`
+
+const cycleName = (id) => {
+  if (!id) return '-'
+  return cycles.value.find((item) => String(item.id) === String(id))?.name || `周期 #${id}`
+}
+
+const statusText = (status) => ({
+  PENDING: '待审批',
+  APPROVED: '已通过',
+  REJECTED: '已驳回'
+}[status] || status || '-')
+
+onMounted(async () => {
+  await Promise.all([loadCycles(), loadEmployees()])
+})
 </script>

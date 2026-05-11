@@ -6,6 +6,7 @@ import com.hrm.domain.AttendanceRecord;
 import com.hrm.dto.AttendanceCreateRequest;
 import com.hrm.dto.AttendanceUpdateRequest;
 import com.hrm.mapper.AttendanceRecordMapper;
+import com.hrm.service.AuditLogService;
 import com.hrm.service.AttendanceService;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import org.springframework.stereotype.Service;
 public class AttendanceServiceImpl implements AttendanceService {
 
 	private final AttendanceRecordMapper attendanceRecordMapper;
+	private final AuditLogService auditLogService;
 
-	public AttendanceServiceImpl(AttendanceRecordMapper attendanceRecordMapper) {
+	public AttendanceServiceImpl(AttendanceRecordMapper attendanceRecordMapper, AuditLogService auditLogService) {
 		this.attendanceRecordMapper = attendanceRecordMapper;
+		this.auditLogService = auditLogService;
 	}
 
 	@Override
@@ -42,6 +45,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 		record.setCheckOut(request.getCheckOut());
 		record.setStatus(request.getStatus() == null ? "NORMAL" : request.getStatus());
 		attendanceRecordMapper.insert(record);
+		auditLogService.record("考勤", "新增", "attendance_record", record.getId(), "员工ID " + record.getEmpId());
 		return record;
 	}
 
@@ -52,6 +56,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 		existing.setCheckOut(request.getCheckOut() == null ? existing.getCheckOut() : request.getCheckOut());
 		existing.setStatus(request.getStatus() == null ? existing.getStatus() : request.getStatus());
 		attendanceRecordMapper.update(existing);
+		auditLogService.record("考勤", "更新", "attendance_record", existing.getId(), "员工ID " + existing.getEmpId());
 		return existing;
 	}
 
@@ -61,5 +66,6 @@ public class AttendanceServiceImpl implements AttendanceService {
 		if (rows == 0) {
 			throw new BizException(ErrorCode.NOT_FOUND, "Attendance record not found");
 		}
+		auditLogService.record("考勤", "删除", "attendance_record", id, null);
 	}
 }

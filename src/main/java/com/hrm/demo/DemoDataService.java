@@ -39,7 +39,9 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -265,33 +267,34 @@ public class DemoDataService {
 	}
 
 	private void ensureAttendance(List<Employee> employees) {
-		if (!attendanceRecordMapper.findAll().isEmpty()) {
-			return;
-		}
-		for (int i = 0; i < Math.min(5, employees.size()); i++) {
+		Set<String> existing = attendanceRecordMapper.findAll().stream()
+				.filter(record -> record.getEmpId() != null && record.getWorkDate() != null)
+				.map(record -> attendanceKey(record.getEmpId(), record.getWorkDate()))
+				.collect(Collectors.toSet());
+		for (int i = 0; i < Math.min(8, employees.size()); i++) {
 			Employee emp = employees.get(i);
 			if (emp != null && emp.getId() != null) {
-				createAttendance(emp.getId());
+				createAttendance(emp.getId(), i, existing);
 			}
 		}
 	}
 
 	private void ensureLeaves(List<Employee> employees) {
-		if (!leaveRequestMapper.findAll().isEmpty()) {
-			return;
-		}
 		if (employees.size() < 2) {
 			return;
 		}
 		Long approverId = employees.get(1).getId();
-		List<Long> targets = new ArrayList<>();
+		Set<Long> existingEmpIds = leaveRequestMapper.findAll().stream()
+				.map(LeaveRequest::getEmpId)
+				.collect(Collectors.toSet());
+		List<Employee> targets = new ArrayList<>();
 		for (Employee emp : employees) {
-			if (emp != null && emp.getId() != null) {
-				targets.add(emp.getId());
+			if (emp != null && emp.getId() != null && !existingEmpIds.contains(emp.getId())) {
+				targets.add(emp);
 			}
 		}
 		for (int i = 0; i < Math.min(3, targets.size()); i++) {
-			createLeave(targets.get(i), approverId);
+			createLeave(targets.get(i).getId(), approverId, i);
 		}
 	}
 
@@ -317,18 +320,24 @@ public class DemoDataService {
 		if (cycle == null || cycle.getId() == null) {
 			return;
 		}
-		if (!performanceReviewMapper.findByCycleId(cycle.getId()).isEmpty()) {
-			return;
-		}
 		if (employees.isEmpty()) {
 			return;
 		}
 		Long reviewerId = employees.get(0).getId();
-		int[] scores = new int[] { 86, 95, 78, 90 };
-		String[] levels = new String[] { "B", "A", "C", "A" };
-		for (int i = 0; i < Math.min(4, employees.size()); i++) {
+		Set<Long> existingEmpIds = performanceReviewMapper.findByCycleId(cycle.getId()).stream()
+				.map(PerformanceReview::getEmpId)
+				.collect(Collectors.toSet());
+		int[] scores = new int[] { 86, 95, 78, 90, 72, 88, 91, 80 };
+		String[] levels = new String[] { "B", "A", "B", "A", "C", "B", "A", "B" };
+		String[] statuses = new String[] { "APPROVED", "APPROVED", "PENDING", "APPROVED", "PENDING", "APPROVED", "APPROVED", "PENDING" };
+		int created = 0;
+		for (int i = 0; i < employees.size() && created < 8; i++) {
 			Employee emp = employees.get(i);
-			createPerformanceReview(cycle.getId(), emp.getId(), reviewerId, scores[i], levels[i]);
+			if (emp == null || emp.getId() == null || existingEmpIds.contains(emp.getId())) {
+				continue;
+			}
+			createPerformanceReview(cycle.getId(), emp.getId(), reviewerId, scores[created], levels[created], statuses[created]);
+			created += 1;
 		}
 	}
 
@@ -474,28 +483,73 @@ public class DemoDataService {
 		return employee;
 	}
 
-	private void createAttendance(Long empId) {
+	private void createAttendance(Long empId, int employeeIndex, Set<String> existing) {
 		LocalDate today = LocalDate.now();
-		for (int i = 1; i <= 5; i += 1) {
+		Map<Integer, String[]> patterns = Map.of(
+				0, new String[] { "NORMAL", "NORMAL", "LATE", "NORMAL", "EARLY_LEAVE", "NORMAL", "NORMAL" },
+				1, new String[] { "NORMAL", "ABSENT", "NORMAL", "NORMAL", "LATE", "NORMAL", "LEAVE" },
+				2, new String[] { "EARLY_LEAVE", "NORMAL", "NORMAL", "ABSENT", "NORMAL", "NORMAL", "NORMAL" },
+				3, new String[] { "NORMAL", "LATE", "NORMAL", "NORMAL", "NORMAL", "EARLY_LEAVE", "NORMAL" },
+				4, new String[] { "LEAVE", "LEAVE", "NORMAL", "NORMAL", "NORMAL", "LATE", "NORMAL" },
+				5, new String[] { "NORMAL", "NORMAL", "ABSENT", "NORMAL", "NORMAL", "NORMAL", "EARLY_LEAVE" },
+				6, new String[] { "LATE", "NORMAL", "NORMAL", "LEAVE", "NORMAL", "NORMAL", "NORMAL" },
+				7, new String[] { "NORMAL", "NORMAL", "NORMAL", "NORMAL", "ABSENT", "LATE", "NORMAL" }
+		);
+		String[] statuses = patterns.getOrDefault(employeeIndex, patterns.get(0));
+		for (int i = 1; i <= statuses.length; i += 1) {
+			String status = statuses[i - 1];
+			LocalDate workDate = today.minusDays(i);
+			String key = attendanceKey(empId, workDate);
+			if (existing.contains(key)) {
+				continue;
+			}
 			AttendanceRecord record = new AttendanceRecord();
 			record.setEmpId(empId);
-			record.setWorkDate(today.minusDays(i));
-			record.setCheckIn(LocalDateTime.now().minusDays(i).withHour(9).withMinute(5));
-			record.setCheckOut(LocalDateTime.now().minusDays(i).withHour(18).withMinute(2));
-			record.setStatus("NORMAL");
+			record.setWorkDate(workDate);
+			fillAttendanceTime(record, status, i);
+			record.setStatus(status);
 			attendanceRecordMapper.insert(record);
+			existing.add(key);
 		}
 	}
 
-	private void createLeave(Long empId, Long approverId) {
+	private String attendanceKey(Long empId, LocalDate workDate) {
+		return empId + "@" + workDate;
+	}
+
+	private void fillAttendanceTime(AttendanceRecord record, String status, int daysAgo) {
+		LocalDateTime base = LocalDateTime.now().minusDays(daysAgo).withSecond(0).withNano(0);
+		if ("ABSENT".equals(status) || "LEAVE".equals(status)) {
+			record.setCheckIn(null);
+			record.setCheckOut(null);
+			return;
+		}
+		if ("LATE".equals(status)) {
+			record.setCheckIn(base.withHour(9).withMinute(45));
+			record.setCheckOut(base.withHour(18).withMinute(10));
+			return;
+		}
+		if ("EARLY_LEAVE".equals(status)) {
+			record.setCheckIn(base.withHour(8).withMinute(55));
+			record.setCheckOut(base.withHour(16).withMinute(50));
+			return;
+		}
+		record.setCheckIn(base.withHour(8).withMinute(58));
+		record.setCheckOut(base.withHour(18).withMinute(3));
+	}
+
+	private void createLeave(Long empId, Long approverId, int index) {
+		String[] types = new String[] { "年假", "病假", "事假" };
+		String[] reasons = new String[] { "家庭事务", "身体不适", "个人事务" };
+		String[] statuses = new String[] { "APPROVED", "PENDING", "REJECTED" };
 		LeaveRequest leave = new LeaveRequest();
 		leave.setEmpId(empId);
-		leave.setLeaveType("年假");
-		leave.setStartTime(LocalDateTime.now().minusDays(7).withHour(9));
-		leave.setEndTime(LocalDateTime.now().minusDays(5).withHour(18));
-		leave.setDays(2.0);
-		leave.setReason("家庭事务");
-		leave.setStatus("APPROVED");
+		leave.setLeaveType(types[index % types.length]);
+		leave.setStartTime(LocalDateTime.now().minusDays(7 + index).withHour(9).withMinute(0));
+		leave.setEndTime(LocalDateTime.now().minusDays(6 + index).withHour(18).withMinute(0));
+		leave.setDays(index == 1 ? 1.0 : 2.0);
+		leave.setReason(reasons[index % reasons.length]);
+		leave.setStatus(statuses[index % statuses.length]);
 		leave.setApproverId(approverId);
 		leaveRequestMapper.insert(leave);
 	}
@@ -527,7 +581,7 @@ public class DemoDataService {
 		}
 	}
 
-	private void createPerformanceReview(Long cycleId, Long empId, Long reviewerId, int score, String level) {
+	private void createPerformanceReview(Long cycleId, Long empId, Long reviewerId, int score, String level, String status) {
 		PerformanceReview review = new PerformanceReview();
 		review.setEmpId(empId);
 		review.setCycleId(cycleId);
@@ -535,9 +589,11 @@ public class DemoDataService {
 		review.setLevel(level);
 		review.setReviewerId(reviewerId);
 		review.setGoalSummary("目标达成率与质量综合评估");
-		review.setApprovalStatus("APPROVED");
-		review.setApproverId(reviewerId);
-		review.setApprovedAt(LocalDateTime.now());
+		review.setApprovalStatus(status);
+		if ("APPROVED".equals(status)) {
+			review.setApproverId(reviewerId);
+			review.setApprovedAt(LocalDateTime.now());
+		}
 		review.setComment("整体表现良好，建议保持学习和协作");
 		performanceReviewMapper.insert(review);
 	}
@@ -546,7 +602,7 @@ public class DemoDataService {
 		if (name == null) {
 			return false;
 		}
-		Set<String> female = Set.of("张晓婷", "周可欣");
+		Set<String> female = Set.of("张晓婷", "周可欣", "赵敏", "孙怡");
 		return female.contains(name);
 	}
 

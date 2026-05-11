@@ -11,6 +11,10 @@ import org.apache.ibatis.annotations.Select;
 public interface PayrollRecordMapper {
 
 	@Select("select id, emp_id, cycle_month, gross_salary, net_salary, tax, overtime_pay, leave_deduction, status, created_at "
+			+ "from payroll_record order by id desc")
+	List<PayrollRecord> findAll();
+
+	@Select("select id, emp_id, cycle_month, gross_salary, net_salary, tax, overtime_pay, leave_deduction, status, created_at "
 			+ "from payroll_record where emp_id = #{empId} order by id desc")
 	List<PayrollRecord> findByEmpId(Long empId);
 

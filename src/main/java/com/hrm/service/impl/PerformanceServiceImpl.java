@@ -16,6 +16,7 @@ import com.hrm.mapper.PerformanceCycleMapper;
 import com.hrm.mapper.PerformanceIndicatorMapper;
 import com.hrm.mapper.PerformanceReviewMapper;
 import com.hrm.mapper.PerformanceRuleMapper;
+import com.hrm.service.AuditLogService;
 import com.hrm.service.PerformanceService;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -27,15 +28,18 @@ public class PerformanceServiceImpl implements PerformanceService {
 	private final PerformanceIndicatorMapper indicatorMapper;
 	private final PerformanceReviewMapper reviewMapper;
 	private final PerformanceRuleMapper ruleMapper;
+	private final AuditLogService auditLogService;
 
 	public PerformanceServiceImpl(PerformanceCycleMapper cycleMapper,
 							  PerformanceIndicatorMapper indicatorMapper,
 							  PerformanceReviewMapper reviewMapper,
-							  PerformanceRuleMapper ruleMapper) {
+							  PerformanceRuleMapper ruleMapper,
+							  AuditLogService auditLogService) {
 		this.cycleMapper = cycleMapper;
 		this.indicatorMapper = indicatorMapper;
 		this.reviewMapper = reviewMapper;
 		this.ruleMapper = ruleMapper;
+		this.auditLogService = auditLogService;
 	}
 
 	@Override
@@ -60,6 +64,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 		cycle.setEndDate(request.getEndDate());
 		cycle.setStatus("OPEN");
 		cycleMapper.insert(cycle);
+		auditLogService.record("绩效", "新增周期", "performance_cycle", cycle.getId(), cycle.getName());
 		return cycle;
 	}
 
@@ -70,6 +75,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 		cycle.setStartDate(request.getStartDate());
 		cycle.setEndDate(request.getEndDate());
 		cycleMapper.update(cycle);
+		auditLogService.record("绩效", "更新周期", "performance_cycle", cycle.getId(), cycle.getName());
 		return cycle;
 	}
 
@@ -79,6 +85,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 		if (rows == 0) {
 			throw new BizException(ErrorCode.NOT_FOUND, "Performance cycle not found");
 		}
+		auditLogService.record("绩效", "删除周期", "performance_cycle", id, null);
 	}
 
 	@Override
@@ -94,6 +101,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 		indicator.setWeight(request.getWeight());
 		indicator.setDescription(request.getDescription());
 		indicatorMapper.insert(indicator);
+		auditLogService.record("绩效", "新增指标", "performance_indicator", indicator.getId(), indicator.getName());
 		return indicator;
 	}
 
@@ -105,6 +113,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 		indicator.setWeight(request.getWeight());
 		indicator.setDescription(request.getDescription());
 		indicatorMapper.update(indicator);
+		auditLogService.record("绩效", "更新指标", "performance_indicator", indicator.getId(), indicator.getName());
 		return indicator;
 	}
 
@@ -114,6 +123,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 		if (rows == 0) {
 			throw new BizException(ErrorCode.NOT_FOUND, "Performance indicator not found");
 		}
+		auditLogService.record("绩效", "删除指标", "performance_indicator", id, null);
 	}
 
 	@Override
@@ -146,6 +156,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 		}
 		review.setLevel(level == null ? "UNSET" : level);
 		reviewMapper.insert(review);
+		auditLogService.record("绩效", "新增评审", "performance_review", review.getId(), "员工ID " + review.getEmpId());
 		return review;
 	}
 
@@ -163,6 +174,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 		existing.setApproverId(request.getApproverId() == null ? existing.getApproverId() : request.getApproverId());
 		existing.setComment(request.getComment() == null ? existing.getComment() : request.getComment());
 		reviewMapper.update(existing);
+		auditLogService.record("绩效", "更新评审", "performance_review", existing.getId(), "状态 " + existing.getApprovalStatus());
 		return existing;
 	}
 	@Override
@@ -179,6 +191,7 @@ public class PerformanceServiceImpl implements PerformanceService {
 			existing.setComment(request.getComment());
 		}
 		reviewMapper.update(existing);
+		auditLogService.record("绩效", "审批评审", "performance_review", existing.getId(), "状态 " + existing.getApprovalStatus());
 		return existing;
 	}
 }

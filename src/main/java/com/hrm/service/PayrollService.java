@@ -9,5 +9,6 @@ import java.util.List;
 public interface PayrollService {
 	PayrollCalcResult calculate(PayrollCalcRequest request);
 	PayrollRecord generate(PayrollGenerateRequest request);
+	List<PayrollRecord> list();
 	List<PayrollRecord> listByEmp(Long empId);
 }

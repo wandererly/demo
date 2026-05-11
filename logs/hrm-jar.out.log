@@ -1,0 +1,902 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.3)
+
+2026-05-11T16:52:43.592+08:00  INFO 28868 --- [hrm] [           main] com.hrm.HrmApplication                   : Starting HrmApplication v0.1.0-SNAPSHOT using Java 21.0.10 with PID 28868 (D:\system\demo\target\hrm-0.1.0-SNAPSHOT.jar started by 10204 in D:\system\demo)
+2026-05-11T16:52:43.598+08:00  INFO 28868 --- [hrm] [           main] com.hrm.HrmApplication                   : No active profile set, falling back to 1 default profile: "default"
+2026-05-11T16:52:43.599+08:00 DEBUG 28868 --- [hrm] [           main] o.s.boot.SpringApplication               : Loading source class com.hrm.HrmApplication
+2026-05-11T16:52:43.667+08:00 DEBUG 28868 --- [hrm] [           main] ConfigServletWebServerApplicationContext : Refreshing org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext@708400f6
+2026-05-11T16:52:45.693+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : Code archive: D:\system\demo\target\hrm-0.1.0-SNAPSHOT.jar
+2026-05-11T16:52:45.694+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : Code archive: D:\system\demo\target\hrm-0.1.0-SNAPSHOT.jar
+2026-05-11T16:52:45.695+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.t.s.TomcatServletWebServerFactory  : None of the document roots [src/main/webapp, public, static] point to a directory and will be ignored.
+2026-05-11T16:52:45.795+08:00  INFO 28868 --- [hrm] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-05-11T16:52:45.845+08:00  INFO 28868 --- [hrm] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-11T16:52:45.846+08:00  INFO 28868 --- [hrm] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-05-11T16:52:45.971+08:00 DEBUG 28868 --- [hrm] [           main] b.w.c.s.WebApplicationContextInitializer : Published root WebApplicationContext as ServletContext attribute with name [org.springframework.web.context.WebApplicationContext.ROOT]
+2026-05-11T16:52:45.974+08:00  INFO 28868 --- [hrm] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2305 ms
+2026-05-11T16:52:46.027+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.w.s.ServletContextInitializerBeans : Mapping filters: springSecurityFilterChain urls=[/*] order=-100, characterEncodingFilter urls=[/*] order=-2147483648, formContentFilter urls=[/*] order=-9900, requestContextFilter urls=[/*] order=-105
+2026-05-11T16:52:46.028+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.w.s.ServletContextInitializerBeans : Mapping servlets: dispatcherServlet urls=[/]
+2026-05-11T16:52:46.095+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.s.f.OrderedRequestContextFilter    : Filter 'requestContextFilter' configured for use
+2026-05-11T16:52:46.097+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.s.f.OrderedCharacterEncodingFilter : Filter 'characterEncodingFilter' configured for use
+2026-05-11T16:52:46.098+08:00 DEBUG 28868 --- [hrm] [           main] .DelegatingFilterProxyRegistrationBean$1 : Filter 'springSecurityFilterChain' configured for use
+2026-05-11T16:52:46.098+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.s.filter.OrderedFormContentFilter  : Filter 'formContentFilter' configured for use
+2026-05-11T16:52:47.169+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.a.AutoConfigurationPackages        : @EnableAutoConfiguration was declared on a class in the package 'com.hrm'. Automatic @Repository and @Entity scanning is enabled.
+2026-05-11T16:52:47.331+08:00  INFO 28868 --- [hrm] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-05-11T16:52:47.648+08:00  INFO 28868 --- [hrm] [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2026-05-11T16:52:47.885+08:00 DEBUG 28868 --- [hrm] [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : 78 mappings in 'requestMappingHandlerMapping'
+2026-05-11T16:52:47.904+08:00 DEBUG 28868 --- [hrm] [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/] in 'viewControllerHandlerMapping'
+2026-05-11T16:52:47.973+08:00 DEBUG 28868 --- [hrm] [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2026-05-11T16:52:48.042+08:00 DEBUG 28868 --- [hrm] [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 2 RequestBodyAdvice, 1 ResponseBodyAdvice
+2026-05-11T16:52:48.180+08:00 DEBUG 28868 --- [hrm] [           main] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2026-05-11T16:52:48.479+08:00  INFO 28868 --- [hrm] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-05-11T16:52:48.495+08:00 DEBUG 28868 --- [hrm] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+
+============================
+CONDITIONS EVALUATION REPORT
+============================
+
+
+Positive matches:
+-----------------
+
+   AopAutoConfiguration matched:
+      - @ConditionalOnBooleanProperty (spring.aop.auto=true) matched (OnPropertyCondition)
+
+   AopAutoConfiguration.ClassProxyingConfiguration matched:
+      - @ConditionalOnMissingClass did not find unwanted class 'org.aspectj.weaver.Advice' (OnClassCondition)
+      - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=true) matched (OnPropertyCondition)
+
+   ApplicationAvailabilityAutoConfiguration#applicationAvailability matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.availability.ApplicationAvailability; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType' (OnClassCondition)
+      - @ConditionalOnMissingBean (types: io.r2dbc.spi.ConnectionFactory; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceAutoConfiguration.PooledDataSourceConfiguration matched:
+      - AnyNestedCondition 1 matched 1 did not; NestedCondition on DataSourceAutoConfiguration.PooledDataSourceCondition.PooledDataSourceAvailable PooledDataSource found supported DataSource; NestedCondition on DataSourceAutoConfiguration.PooledDataSourceCondition.ExplicitType @ConditionalOnProperty (spring.datasource.type) did not find property 'spring.datasource.type' (DataSourceAutoConfiguration.PooledDataSourceCondition)
+      - @ConditionalOnMissingBean (types: javax.sql.DataSource,javax.sql.XADataSource; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceAutoConfiguration.PooledDataSourceConfiguration#jdbcConnectionDetails matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceConfiguration.Hikari matched:
+      - @ConditionalOnClass found required class 'com.zaxxer.hikari.HikariDataSource' (OnClassCondition)
+      - @ConditionalOnProperty (spring.datasource.type=com.zaxxer.hikari.HikariDataSource) matched (OnPropertyCondition)
+      - @ConditionalOnMissingBean (types: javax.sql.DataSource; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourceInitializationAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.jdbc.datasource.init.DatabasePopulator' (OnClassCondition)
+      - SQL InitializationDatabase Initialization default value is EMBEDDED (OnSqlInitializationCondition)
+      - @ConditionalOnSingleCandidate (types: javax.sql.DataSource; SearchStrategy: all) found a single bean 'dataSource'; @ConditionalOnMissingBean (types: org.springframework.boot.sql.autoconfigure.init.ApplicationScriptDatabaseInitializer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DataSourcePoolMetadataProvidersConfiguration.HikariPoolDataSourceMetadataProviderConfiguration matched:
+      - @ConditionalOnClass found required class 'com.zaxxer.hikari.HikariDataSource' (OnClassCondition)
+
+   DataSourceTransactionManagerAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.core.JdbcTemplate', 'org.springframework.transaction.TransactionManager' (OnClassCondition)
+
+   DataSourceTransactionManagerAutoConfiguration.JdbcTransactionManagerConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: javax.sql.DataSource; SearchStrategy: all) found a single bean 'dataSource' (OnBeanCondition)
+
+   DataSourceTransactionManagerAutoConfiguration.JdbcTransactionManagerConfiguration#transactionManager matched:
+      - @ConditionalOnMissingBean (types: org.springframework.transaction.TransactionManager; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   DispatcherServletAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.web.servlet.DispatcherServlet' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletConfiguration matched:
+      - @ConditionalOnClass found required class 'jakarta.servlet.ServletRegistration' (OnClassCondition)
+      - Default DispatcherServlet did not find dispatcher servlet beans (DispatcherServletAutoConfiguration.DefaultDispatcherServletCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletRegistrationConfiguration matched:
+      - @ConditionalOnClass found required class 'jakarta.servlet.ServletRegistration' (OnClassCondition)
+      - DispatcherServlet Registration did not find servlet registration bean (DispatcherServletAutoConfiguration.DispatcherServletRegistrationCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletRegistrationConfiguration#dispatcherServletRegistration matched:
+      - @ConditionalOnBean (names: dispatcherServlet types: org.springframework.web.servlet.DispatcherServlet; SearchStrategy: all) found bean 'dispatcherServlet' (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.servlet.Servlet', 'org.springframework.web.servlet.DispatcherServlet' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   ErrorMvcAutoConfiguration#basicErrorController matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.webmvc.error.ErrorController; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration#errorAttributes matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.webmvc.error.ErrorAttributes; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration.DefaultErrorViewResolverConfiguration#conventionErrorViewResolver matched:
+      - @ConditionalOnBean (types: org.springframework.web.servlet.DispatcherServlet; SearchStrategy: all) found bean 'dispatcherServlet'; @ConditionalOnMissingBean (types: org.springframework.boot.webmvc.autoconfigure.error.ErrorViewResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration matched:
+      - @ConditionalOnBooleanProperty (spring.web.error.whitelabel.enabled=true) matched (OnPropertyCondition)
+      - ErrorTemplate Missing did not find error template view (ErrorMvcAutoConfiguration.ErrorTemplateMissingCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration#beanNameViewResolver matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.view.BeanNameViewResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ErrorMvcAutoConfiguration.WhitelabelErrorViewConfiguration#defaultErrorView matched:
+      - @ConditionalOnMissingBean (names: error; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   HttpEncodingAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.web.filter.CharacterEncodingFilter' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnBooleanProperty (spring.servlet.encoding.enabled=true) matched (OnPropertyCondition)
+
+   HttpEncodingAutoConfiguration#characterEncodingFilter matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.filter.CharacterEncodingFilter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   HttpMessageConvertersAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.http.converter.HttpMessageConverter' (OnClassCondition)
+      - NoneNestedConditions 0 matched 1 did not; NestedCondition on HttpMessageConvertersAutoConfiguration.NotReactiveWebApplicationCondition.ReactiveWebApplication did not find reactive web application classes (HttpMessageConvertersAutoConfiguration.NotReactiveWebApplicationCondition)
+
+   HttpMessageConvertersAutoConfiguration.StringHttpMessageConverterConfiguration#stringHttpMessageConvertersCustomizer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.http.converter.StringHttpMessageConverter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JacksonAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'tools.jackson.databind.json.JsonMapper' (OnClassCondition)
+
+   JacksonAutoConfiguration#jacksonJsonMapper matched:
+      - @ConditionalOnMissingBean (types: tools.jackson.databind.json.JsonMapper; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JacksonAutoConfiguration#jsonMapperBuilder matched:
+      - @ConditionalOnMissingBean (types: tools.jackson.databind.json.JsonMapper$Builder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JacksonAutoConfiguration.JsonProblemDetailsConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.http.ProblemDetail' (OnClassCondition)
+
+   JacksonHttpMessageConvertersConfiguration.JacksonJsonHttpMessageConverterConfiguration matched:
+      - @ConditionalOnClass found required class 'tools.jackson.databind.json.JsonMapper' (OnClassCondition)
+      - @ConditionalOnProperty (spring.http.converters.preferred-json-mapper=jackson) matched (OnPropertyCondition)
+      - @ConditionalOnBean (types: tools.jackson.databind.json.JsonMapper; SearchStrategy: all) found bean 'jacksonJsonMapper' (OnBeanCondition)
+
+   JacksonHttpMessageConvertersConfiguration.JacksonJsonHttpMessageConverterConfiguration#jacksonJsonHttpMessageConvertersCustomizer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.http.converter.json.JacksonJsonHttpMessageConverter ignored: org.springframework.hateoas.server.mvc.TypeConstrainedJacksonJsonHttpMessageConverter,org.springframework.data.rest.webmvc.alps.AlpsJacksonJsonHttpMessageConverter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JdbcClientAutoConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate; SearchStrategy: all) found a single bean 'namedParameterJdbcTemplate'; @ConditionalOnMissingBean (types: org.springframework.jdbc.core.simple.JdbcClient; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   JdbcTemplateAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.core.JdbcTemplate' (OnClassCondition)
+      - @ConditionalOnSingleCandidate (types: javax.sql.DataSource; SearchStrategy: all) found a single bean 'dataSource' (OnBeanCondition)
+
+   JdbcTemplateConfiguration matched:
+      - @ConditionalOnMissingBean (types: org.springframework.jdbc.core.JdbcOperations; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   LifecycleAutoConfiguration#defaultLifecycleProcessor matched:
+      - @ConditionalOnMissingBean (names: lifecycleProcessor; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   MultipartAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.servlet.Servlet', 'org.springframework.web.multipart.support.StandardServletMultipartResolver', 'jakarta.servlet.MultipartConfigElement' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnBooleanProperty (spring.servlet.multipart.enabled=true) matched (OnPropertyCondition)
+
+   MultipartAutoConfiguration#multipartConfigElement matched:
+      - @ConditionalOnMissingBean (types: jakarta.servlet.MultipartConfigElement; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   MultipartAutoConfiguration#multipartResolver matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.multipart.MultipartResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   MybatisLanguageDriverAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.apache.ibatis.scripting.LanguageDriver' (OnClassCondition)
+
+   NamedParameterJdbcTemplateConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: org.springframework.jdbc.core.JdbcTemplate; SearchStrategy: all) found a single bean 'jdbcTemplate'; @ConditionalOnMissingBean (types: org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   PersistenceExceptionTranslationAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor' (OnClassCondition)
+
+   PersistenceExceptionTranslationAutoConfiguration#persistenceExceptionTranslationPostProcessor matched:
+      - @ConditionalOnBooleanProperty (spring.persistence.exceptiontranslation.enabled=true) matched (OnPropertyCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   PropertyPlaceholderAutoConfiguration#propertySourcesPlaceholderConfigurer matched:
+      - @ConditionalOnMissingBean (types: org.springframework.context.support.PropertySourcesPlaceholderConfigurer; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   SecurityAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.authentication.DefaultAuthenticationEventPublisher' (OnClassCondition)
+
+   SecurityAutoConfiguration#authenticationEventPublisher matched:
+      - @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationEventPublisher; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   SecurityFilterAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer', 'org.springframework.security.config.http.SessionCreationPolicy' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   SecurityFilterAutoConfiguration#securityFilterChainRegistration matched:
+      - @ConditionalOnBean (names: springSecurityFilterChain; SearchStrategy: all) found bean 'springSecurityFilterChain' (OnBeanCondition)
+
+   ServletWebSecurityAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.EnableWebSecurity' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   ServletWebSecurityAutoConfiguration.EnableWebSecurityConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.EnableWebSecurity' (OnClassCondition)
+      - @ConditionalOnMissingBean (names: springSecurityFilterChain; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ServletWebSecurityAutoConfiguration.PathPatternRequestMatcherBuilderConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.boot.webmvc.autoconfigure.DispatcherServletPath' (OnClassCondition)
+      - @ConditionalOnBean (types: org.springframework.boot.webmvc.autoconfigure.DispatcherServletPath; SearchStrategy: all) found bean 'dispatcherServletRegistration' (OnBeanCondition)
+
+   ServletWebSecurityAutoConfiguration.PathPatternRequestMatcherBuilderConfiguration#pathPatternRequestMatcherBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher$Builder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   SslAutoConfiguration#sslBundleRegistry matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.ssl.SslBundleRegistry,org.springframework.boot.ssl.SslBundles; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskExecutionAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor' (OnClassCondition)
+
+   TaskExecutorConfigurations.AsyncConfigurerConfiguration matched:
+      - @ConditionalOnMissingBean (types: org.springframework.scheduling.annotation.AsyncConfigurer; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskExecutorConfigurations.SimpleAsyncTaskExecutorBuilderConfiguration#simpleAsyncTaskExecutorBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration matched:
+      - AnyNestedCondition 1 matched 1 did not; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ModelCondition @ConditionalOnProperty (spring.task.execution.mode=force) did not find property 'spring.task.execution.mode'; NestedCondition on TaskExecutorConfigurations.OnExecutorCondition.ExecutorBeanCondition @ConditionalOnMissingBean (types: java.util.concurrent.Executor; SearchStrategy: all) did not find any beans (TaskExecutorConfigurations.OnExecutorCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration#applicationTaskExecutor matched:
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+   TaskExecutorConfigurations.ThreadPoolTaskExecutorBuilderConfiguration#threadPoolTaskExecutorBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.task.ThreadPoolTaskExecutorBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TaskSchedulingAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler' (OnClassCondition)
+
+   TaskSchedulingConfigurations.SimpleAsyncTaskSchedulerBuilderConfiguration#simpleAsyncTaskSchedulerBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.task.SimpleAsyncTaskSchedulerBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+      - @ConditionalOnThreading found PLATFORM (OnThreadingCondition)
+
+   TaskSchedulingConfigurations.ThreadPoolTaskSchedulerBuilderConfiguration#threadPoolTaskSchedulerBuilder matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.task.ThreadPoolTaskSchedulerBuilder; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TomcatServletWebServerAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.servlet.ServletRequest', 'org.apache.catalina.startup.Tomcat', 'org.apache.coyote.UpgradeProtocol', 'org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+
+   TomcatServletWebServerAutoConfiguration#tomcatServletWebServerFactory matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.web.server.servlet.ServletWebServerFactory; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   TomcatWebServerConfiguration matched:
+      - @ConditionalOnWarDeployment the application is not deployed as a WAR file. (OnWarDeploymentCondition)
+
+   TomcatWebServerConfiguration.TomcatWebSocketConfiguration matched:
+      - @ConditionalOnClass found required class 'org.apache.tomcat.websocket.server.WsSci' (OnClassCondition)
+
+   TransactionAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.transaction.PlatformTransactionManager' (OnClassCondition)
+
+   TransactionAutoConfiguration.EnableTransactionManagementConfiguration matched:
+      - @ConditionalOnBean (types: org.springframework.transaction.TransactionManager; SearchStrategy: all) found bean 'transactionManager'; @ConditionalOnMissingBean (types: org.springframework.transaction.annotation.AbstractTransactionManagementConfiguration; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TransactionAutoConfiguration.EnableTransactionManagementConfiguration.CglibAutoProxyConfiguration matched:
+      - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=true) matched (OnPropertyCondition)
+
+   TransactionAutoConfiguration.TransactionTemplateConfiguration matched:
+      - @ConditionalOnSingleCandidate (types: org.springframework.transaction.PlatformTransactionManager; SearchStrategy: all) found a single bean 'transactionManager' (OnBeanCondition)
+
+   TransactionAutoConfiguration.TransactionTemplateConfiguration#transactionTemplate matched:
+      - @ConditionalOnMissingBean (types: org.springframework.transaction.support.TransactionOperations; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TransactionManagerCustomizationAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.transaction.PlatformTransactionManager' (OnClassCondition)
+
+   TransactionManagerCustomizationAutoConfiguration#platformTransactionManagerCustomizers matched:
+      - @ConditionalOnMissingBean (types: org.springframework.boot.transaction.autoconfigure.TransactionManagerCustomizers; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ValidationAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'jakarta.validation.executable.ExecutableValidator' (OnClassCondition)
+      - @ConditionalOnResource found location classpath:META-INF/services/jakarta.validation.spi.ValidationProvider (OnResourceCondition)
+
+   ValidationAutoConfiguration#defaultValidator matched:
+      - @ConditionalOnMissingBean (types: jakarta.validation.Validator; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   ValidationAutoConfiguration#methodValidationPostProcessor matched:
+      - @ConditionalOnMissingBean (types: org.springframework.validation.beanvalidation.MethodValidationPostProcessor; SearchStrategy: current) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration matched:
+      - @ConditionalOnClass found required classes 'jakarta.servlet.Servlet', 'org.springframework.web.servlet.DispatcherServlet', 'org.springframework.web.servlet.config.annotation.WebMvcConfigurer' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration#formContentFilter matched:
+      - @ConditionalOnBooleanProperty (spring.mvc.formcontent.filter.enabled=true) matched (OnPropertyCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.web.filter.FormContentFilter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.EnableWebMvcConfiguration#flashMapManager matched:
+      - @ConditionalOnMissingBean (names: flashMapManager; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.EnableWebMvcConfiguration#localeResolver matched:
+      - @ConditionalOnMissingBean (names: localeResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.EnableWebMvcConfiguration#viewNameTranslator matched:
+      - @ConditionalOnMissingBean (names: viewNameTranslator; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#defaultViewResolver matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.servlet.view.InternalResourceViewResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#requestContextFilter matched:
+      - @ConditionalOnMissingBean (types: org.springframework.web.context.request.RequestContextListener,org.springframework.web.filter.RequestContextFilter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#viewResolver matched:
+      - @ConditionalOnBean (types: org.springframework.web.servlet.ViewResolver; SearchStrategy: all) found beans 'defaultViewResolver', 'beanNameViewResolver', 'mvcViewResolver'; @ConditionalOnMissingBean (names: viewResolver types: org.springframework.web.servlet.view.ContentNegotiatingViewResolver; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+   AopAutoConfiguration.AspectJAutoProxyingConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.aspectj.weaver.Advice' (OnClassCondition)
+
+   DataSourceAutoConfiguration.EmbeddedDatabaseConfiguration:
+      Did not match:
+         - EmbeddedDataSource spring.datasource.url is set (DataSourceAutoConfiguration.EmbeddedDatabaseCondition)
+
+   DataSourceCheckpointRestoreConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.crac.Resource' (OnClassCondition)
+
+   DataSourceConfiguration.Dbcp2:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.apache.commons.dbcp2.BasicDataSource' (OnClassCondition)
+
+   DataSourceConfiguration.Generic:
+      Did not match:
+         - @ConditionalOnProperty (spring.datasource.type) did not find property 'spring.datasource.type' (OnPropertyCondition)
+
+   DataSourceConfiguration.OracleUcp:
+      Did not match:
+         - @ConditionalOnClass did not find required classes 'oracle.ucp.jdbc.PoolDataSourceImpl', 'oracle.jdbc.OracleConnection' (OnClassCondition)
+
+   DataSourceConfiguration.Tomcat:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.apache.tomcat.jdbc.pool.DataSource' (OnClassCondition)
+
+   DataSourceHealthContributorAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.health.autoconfigure.contributor.ConditionalOnEnabledHealthIndicator' (OnClassCondition)
+
+   DataSourceJmxConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.jmx.enabled=true) did not find property 'spring.jmx.enabled' (OnPropertyCondition)
+
+   DataSourcePoolMetadataProvidersConfiguration.CommonsDbcp2PoolDataSourceMetadataProviderConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.apache.commons.dbcp2.BasicDataSource' (OnClassCondition)
+
+   DataSourcePoolMetadataProvidersConfiguration.OracleUcpPoolDataSourceMetadataProviderConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required classes 'oracle.ucp.jdbc.PoolDataSource', 'oracle.jdbc.OracleConnection' (OnClassCondition)
+
+   DataSourcePoolMetadataProvidersConfiguration.TomcatDataSourcePoolMetadataProviderConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.apache.tomcat.jdbc.pool.DataSource' (OnClassCondition)
+
+   DataSourcePoolMetricsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'io.micrometer.core.instrument.MeterRegistry' (OnClassCondition)
+
+   DispatcherServletAutoConfiguration.DispatcherServletConfiguration#multipartResolver:
+      Did not match:
+         - @ConditionalOnBean (types: org.springframework.web.multipart.MultipartResolver; SearchStrategy: all) did not find any beans of type org.springframework.web.multipart.MultipartResolver (OnBeanCondition)
+
+   GsonHttpMessageConvertersConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'com.google.gson.Gson' (OnClassCondition)
+
+   Jackson2HttpMessageConvertersConfiguration.MappingJackson2HttpMessageConverterConfiguration:
+      Did not match:
+         - AnyNestedCondition 0 matched 2 did not; NestedCondition on Jackson2HttpMessageConvertersConfiguration.PreferJackson2OrJacksonUnavailableCondition.JacksonUnavailable @ConditionalOnMissingBean (types: org.springframework.boot.http.converter.autoconfigure.JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConvertersCustomizer; SearchStrategy: all) found beans of type 'org.springframework.boot.http.converter.autoconfigure.JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConvertersCustomizer' jacksonJsonHttpMessageConvertersCustomizer; NestedCondition on Jackson2HttpMessageConvertersConfiguration.PreferJackson2OrJacksonUnavailableCondition.Jackson2Preferred @ConditionalOnProperty (spring.http.converters.preferred-json-mapper=jackson2) did not find property 'spring.http.converters.preferred-json-mapper' (Jackson2HttpMessageConvertersConfiguration.PreferJackson2OrJacksonUnavailableCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'com.fasterxml.jackson.databind.ObjectMapper' (OnClassCondition)
+
+   Jackson2HttpMessageConvertersConfiguration.MappingJackson2XmlHttpMessageConverterConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'com.fasterxml.jackson.dataformat.xml.XmlMapper' (OnClassCondition)
+
+   JacksonAutoConfiguration.CborConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'tools.jackson.dataformat.cbor.CBORMapper' (OnClassCondition)
+
+   JacksonAutoConfiguration.XmlConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'tools.jackson.dataformat.xml.XmlMapper' (OnClassCondition)
+
+   JacksonHttpMessageConvertersConfiguration.JacksonXmlHttpMessageConverterConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'tools.jackson.dataformat.xml.XmlMapper' (OnClassCondition)
+
+   JmxAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.jmx.enabled=true) did not find property 'spring.jmx.enabled' (OnPropertyCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.jmx.export.MBeanExporter' (OnClassCondition)
+
+   JndiDataSourceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnProperty (spring.datasource.jndi-name) did not find property 'spring.datasource.jndi-name' (OnPropertyCondition)
+      Matched:
+         - @ConditionalOnClass found required classes 'javax.sql.DataSource', 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType' (OnClassCondition)
+
+   JsonbHttpMessageConvertersConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'jakarta.json.bind.Jsonb' (OnClassCondition)
+
+   JtaAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'jakarta.transaction.Transaction' (OnClassCondition)
+
+   KotlinSerializationHttpMessageConvertersConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required classes 'kotlinx.serialization.Serializable', 'kotlinx.serialization.json.Json' (OnClassCondition)
+
+   ManagementWebSecurityAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration' (OnClassCondition)
+
+   MessageSourceAutoConfiguration:
+      Did not match:
+         - ResourceBundle did not find bundle with basename messages (MessageSourceAutoConfiguration.ResourceBundleCondition)
+
+   MybatisAutoConfiguration:
+      Did not match:
+         - @ConditionalOnSingleCandidate (types: javax.sql.DataSource; SearchStrategy: all) did not find any beans (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required classes 'org.apache.ibatis.session.SqlSessionFactory', 'org.mybatis.spring.SqlSessionFactoryBean' (OnClassCondition)
+
+   MybatisLanguageDriverAutoConfiguration.FreeMarkerConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required classes 'org.mybatis.scripting.freemarker.FreeMarkerLanguageDriver', 'org.mybatis.scripting.freemarker.FreeMarkerLanguageDriverConfig' (OnClassCondition)
+
+   MybatisLanguageDriverAutoConfiguration.LegacyFreeMarkerConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.mybatis.scripting.freemarker.FreeMarkerLanguageDriver' (OnClassCondition)
+
+   MybatisLanguageDriverAutoConfiguration.LegacyVelocityConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.mybatis.scripting.velocity.Driver' (OnClassCondition)
+
+   MybatisLanguageDriverAutoConfiguration.ThymeleafConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.mybatis.scripting.thymeleaf.ThymeleafLanguageDriver' (OnClassCondition)
+
+   MybatisLanguageDriverAutoConfiguration.VelocityConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required classes 'org.mybatis.scripting.velocity.VelocityLanguageDriver', 'org.mybatis.scripting.velocity.VelocityLanguageDriverConfig' (OnClassCondition)
+
+   ProjectInfoAutoConfiguration#buildProperties:
+      Did not match:
+         - @ConditionalOnResource did not find resource '${spring.info.build.location:classpath:META-INF/build-info.properties}' (OnResourceCondition)
+
+   ProjectInfoAutoConfiguration#gitProperties:
+      Did not match:
+         - GitResource did not find git info at classpath:git.properties (ProjectInfoAutoConfiguration.GitResourceAvailableCondition)
+
+   RSocketSecurityAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.rsocket.server.RSocketServerCustomizer' (OnClassCondition)
+
+   ReactiveManagementWebSecurityAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointAutoConfiguration' (OnClassCondition)
+
+   ReactiveUserDetailsServiceAutoConfiguration:
+      Did not match:
+         - AnyNestedCondition 0 matched 2 did not; NestedCondition on ReactiveUserDetailsServiceAutoConfiguration.RSocketEnabledOrReactiveWebApplication.ReactiveWebApplicationCondition did not find reactive web application classes; NestedCondition on ReactiveUserDetailsServiceAutoConfiguration.RSocketEnabledOrReactiveWebApplication.RSocketSecurityEnabledCondition @ConditionalOnBean (types: org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler; SearchStrategy: all) did not find any beans of type org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler (ReactiveUserDetailsServiceAutoConfiguration.RSocketEnabledOrReactiveWebApplication)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.authentication.ReactiveAuthenticationManager' (OnClassCondition)
+         - AnyNestedCondition 1 matched 2 did not; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured)
+
+   ReactiveWebSecurityAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'reactor.core.publisher.Flux' (OnClassCondition)
+
+   SecurityAutoConfiguration.SecurityDataConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.security.data.repository.query.SecurityEvaluationContextExtension' (OnClassCondition)
+
+   ServletHttpExchangesAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBean did not find required type 'org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository' (OnBeanCondition)
+
+   ServletManagementContextAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties' (OnClassCondition)
+
+   ServletMappingsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint' (OnClassCondition)
+
+   ServletWebSecurityAutoConfiguration.SecurityFilterChainConfiguration:
+      Did not match:
+         - AllNestedConditions 1 matched 1 did not; NestedCondition on DefaultWebSecurityCondition.Beans @ConditionalOnMissingBean (types: org.springframework.security.web.SecurityFilterChain; SearchStrategy: all) found beans of type 'org.springframework.security.web.SecurityFilterChain' filterChain; NestedCondition on DefaultWebSecurityCondition.Classes @ConditionalOnClass found required classes 'org.springframework.security.web.SecurityFilterChain', 'org.springframework.security.config.annotation.web.builders.HttpSecurity' (DefaultWebSecurityCondition)
+
+   ServletWebServerConfiguration#forwardedHeaderFilter:
+      Did not match:
+         - @ConditionalOnProperty (server.forward-headers-strategy=framework) did not find property 'server.forward-headers-strategy' (OnPropertyCondition)
+
+   SpringApplicationAdminJmxAutoConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.application.admin.enabled=true) did not find property 'spring.application.admin.enabled' (OnPropertyCondition)
+
+   TaskExecutorConfigurations.AsyncConfigurerWrapperConfiguration:
+      Did not match:
+         - @ConditionalOnBean (types: org.springframework.scheduling.annotation.AsyncConfigurer; SearchStrategy: all) did not find any beans of type org.springframework.scheduling.annotation.AsyncConfigurer (OnBeanCondition)
+
+   TaskExecutorConfigurations.SimpleAsyncTaskExecutorBuilderConfiguration#simpleAsyncTaskExecutorBuilderVirtualThreads:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder; SearchStrategy: all) found beans of type 'org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder' simpleAsyncTaskExecutorBuilder (OnBeanCondition)
+
+   TaskExecutorConfigurations.TaskExecutorConfiguration#applicationTaskExecutorVirtualThreads:
+      Did not match:
+         - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
+
+   TaskSchedulingAutoConfiguration#scheduledBeanLazyInitializationExcludeFilter:
+      Did not match:
+         - @ConditionalOnBean (names: org.springframework.scheduling.config.internalScheduledAnnotationProcessor; SearchStrategy: all) did not find any beans named org.springframework.scheduling.config.internalScheduledAnnotationProcessor (OnBeanCondition)
+
+   TaskSchedulingConfigurations.SimpleAsyncTaskSchedulerBuilderConfiguration#simpleAsyncTaskSchedulerBuilderVirtualThreads:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.boot.task.SimpleAsyncTaskSchedulerBuilder; SearchStrategy: all) found beans of type 'org.springframework.boot.task.SimpleAsyncTaskSchedulerBuilder' simpleAsyncTaskSchedulerBuilder (OnBeanCondition)
+
+   TaskSchedulingConfigurations.TaskSchedulerConfiguration:
+      Did not match:
+         - @ConditionalOnBean (names: org.springframework.scheduling.config.internalScheduledAnnotationProcessor; SearchStrategy: all) did not find any beans named org.springframework.scheduling.config.internalScheduledAnnotationProcessor (OnBeanCondition)
+
+   TomcatMetricsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'io.micrometer.core.instrument.binder.tomcat.TomcatMetrics' (OnClassCondition)
+
+   TomcatReactiveManagementContextAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextFactory' (OnClassCondition)
+
+   TomcatReactiveWebServerAutoConfiguration:
+      Did not match:
+         - @ConditionalOnWebApplication did not find reactive web application classes (OnWebApplicationCondition)
+
+   TomcatServletManagementContextAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.web.server.ManagementContextFactory' (OnClassCondition)
+
+   TomcatServletWebServerAutoConfiguration#tomcatForwardedHeaderFilterCustomizer:
+      Did not match:
+         - @ConditionalOnProperty (server.forward-headers-strategy=framework) did not find property 'server.forward-headers-strategy' (OnPropertyCondition)
+
+   TomcatWebServerConfiguration#tomcatVirtualThreadsProtocolHandlerCustomizer:
+      Did not match:
+         - @ConditionalOnThreading did not find VIRTUAL (OnThreadingCondition)
+
+   TransactionAutoConfiguration#transactionalOperator:
+      Did not match:
+         - @ConditionalOnSingleCandidate (types: org.springframework.transaction.ReactiveTransactionManager; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   TransactionAutoConfiguration.AspectJTransactionManagementConfiguration:
+      Did not match:
+         - @ConditionalOnBean did not find required type 'org.springframework.transaction.aspectj.AbstractTransactionAspect' (OnBeanCondition)
+         - @ConditionalOnBean (types: org.springframework.transaction.aspectj.AbstractTransactionAspect; SearchStrategy: all) did not find any beans of type org.springframework.transaction.aspectj.AbstractTransactionAspect (OnBeanCondition)
+
+   TransactionAutoConfiguration.EnableTransactionManagementConfiguration.JdkDynamicAutoProxyConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.aop.proxy-target-class=false) did not find property 'spring.aop.proxy-target-class' (OnPropertyCondition)
+
+   UserDetailsServiceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.authentication.AuthenticationManagerResolver,org.springframework.security.oauth2.jwt.JwtDecoder; SearchStrategy: all) found beans of type 'org.springframework.security.authentication.AuthenticationManager' authenticationManager and found beans of type 'org.springframework.security.core.userdetails.UserDetailsService' customUserDetailsService (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+         - found 'session' scope (OnWebApplicationCondition)
+         - AnyNestedCondition 1 matched 2 did not; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.PasswordConfigured @ConditionalOnProperty (spring.security.user.password) did not find property 'spring.security.user.password'; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.NameConfigured @ConditionalOnProperty (spring.security.user.name) did not find property 'spring.security.user.name'; NestedCondition on MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured.MissingAlternative @ConditionalOnMissingClass did not find unwanted classes 'org.springframework.security.oauth2.client.registration.ClientRegistrationRepository', 'org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector', 'org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository' (MissingAlternativeUserDetailsManagerOrUserPropertiesConfigured)
+
+   WebMvcAutoConfiguration#hiddenHttpMethodFilter:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.mvc.hiddenmethod.filter.enabled=true) did not find property 'spring.mvc.hiddenmethod.filter.enabled' (OnPropertyCondition)
+
+   WebMvcAutoConfiguration.ProblemDetailsErrorHandlingConfiguration:
+      Did not match:
+         - @ConditionalOnBooleanProperty (spring.mvc.problemdetails.enabled=true) did not find property 'spring.mvc.problemdetails.enabled' (OnPropertyCondition)
+
+   WebMvcAutoConfiguration.ResourceChainCustomizerConfiguration:
+      Did not match:
+         - @ConditionalOnEnabledResourceChain did not find class org.webjars.WebJarVersionLocator (OnEnabledResourceChainCondition)
+
+   WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#beanNameViewResolver:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.web.servlet.view.BeanNameViewResolver; SearchStrategy: all) found beans of type 'org.springframework.web.servlet.view.BeanNameViewResolver' beanNameViewResolver (OnBeanCondition)
+
+   WebMvcHealthEndpointExtensionAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.health.actuate.endpoint.HealthEndpoint' (OnClassCondition)
+
+   WebMvcMappingsAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint' (OnClassCondition)
+
+   WebMvcObservationAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.boot.micrometer.observation.autoconfigure.ObservationProperties' (OnClassCondition)
+
+   XADataSourceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'jakarta.transaction.TransactionManager' (OnClassCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration
+
+    org.springframework.boot.autoconfigure.ssl.SslAutoConfiguration
+
+    org.springframework.boot.autoconfigure.context.LifecycleAutoConfiguration
+
+    org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
+
+    org.springframework.boot.autoconfigure.availability.ApplicationAvailabilityAutoConfiguration
+
+    org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration
+
+
+
+2026-05-11T16:52:48.521+08:00  INFO 28868 --- [hrm] [           main] com.hrm.HrmApplication                   : Started HrmApplication in 5.579 seconds (process running for 6.42)
+2026-05-11T16:52:48.526+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.a.ApplicationAvailabilityBean      : Application availability state LivenessState changed to CORRECT
+2026-05-11T16:52:48.534+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL statement [CREATE TABLE IF NOT EXISTS job_level (id bigint NOT NULL AUTO_INCREMENT,level_code varchar(20) NOT NULL,level_name varchar(50) NOT NULL,`rank` int NOT NULL,salary_min decimal(12,2) NOT NULL,salary_max decimal(12,2) NOT NULL,description varchar(255) DEFAULT NULL,status varchar(20) NOT NULL DEFAULT 'ACTIVE',created_at datetime NOT NULL,PRIMARY KEY (id),UNIQUE KEY uk_job_level_code (level_code)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]
+2026-05-11T16:52:48.545+08:00  INFO 28868 --- [hrm] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-11T16:52:49.126+08:00  INFO 28868 --- [hrm] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4ab455e2
+2026-05-11T16:52:49.129+08:00  INFO 28868 --- [hrm] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-11T16:52:49.216+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : SQLWarning ignored: SQL state '42S01', error code '1050', message [Table 'job_level' already exists]
+2026-05-11T16:52:49.223+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL statement [CREATE TABLE IF NOT EXISTS job_position (id bigint NOT NULL AUTO_INCREMENT,dept_id bigint NOT NULL,level_id bigint NOT NULL,position_code varchar(50) NOT NULL,position_name varchar(100) NOT NULL,path_group varchar(50) DEFAULT NULL,description varchar(255) DEFAULT NULL,status varchar(20) NOT NULL DEFAULT 'ACTIVE',created_at datetime NOT NULL,updated_at datetime NOT NULL,PRIMARY KEY (id),UNIQUE KEY uk_job_position_code (position_code),KEY idx_job_position_dept (dept_id),KEY idx_job_position_level (level_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]
+2026-05-11T16:52:49.227+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : SQLWarning ignored: SQL state '42S01', error code '1050', message [Table 'job_position' already exists]
+2026-05-11T16:52:49.227+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL statement [CREATE TABLE IF NOT EXISTS promotion_path (id bigint NOT NULL AUTO_INCREMENT,from_position_id bigint NOT NULL,to_position_id bigint NOT NULL,min_months int NOT NULL,condition_text varchar(255) DEFAULT NULL,created_at datetime NOT NULL,PRIMARY KEY (id),KEY idx_promotion_from (from_position_id),KEY idx_promotion_to (to_position_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4]
+2026-05-11T16:52:49.230+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : SQLWarning ignored: SQL state '42S01', error code '1050', message [Table 'promotion_path' already exists]
+2026-05-11T16:52:49.232+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-05-11T16:52:49.233+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select count(*) from information_schema.columns where table_schema = database() and table_name = ? and column_name = ?]
+2026-05-11T16:52:49.270+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-05-11T16:52:49.271+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select count(*) from information_schema.columns where table_schema = database() and table_name = ? and column_name = ?]
+2026-05-11T16:52:49.273+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-05-11T16:52:49.273+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select count(*) from information_schema.columns where table_schema = database() and table_name = ? and column_name = ?]
+2026-05-11T16:52:49.275+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-05-11T16:52:49.276+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select count(*) from information_schema.columns where table_schema = database() and table_name = ? and column_name = ?]
+2026-05-11T16:52:49.277+08:00 DEBUG 28868 --- [hrm] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL statement [update payroll_tax_bracket set min_income = 0 where min_income is null]
+2026-05-11T16:52:49.423+08:00 DEBUG 28868 --- [hrm] [           main] o.s.b.a.ApplicationAvailabilityBean      : Application availability state ReadinessState changed to ACCEPTING_TRAFFIC
+2026-05-11T16:52:50.247+08:00  INFO 28868 --- [hrm] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-11T16:52:50.249+08:00  INFO 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-05-11T16:52:50.249+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2026-05-11T16:52:50.249+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2026-05-11T16:52:50.251+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@3887b690
+2026-05-11T16:52:50.251+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@36b6d627
+2026-05-11T16:52:50.251+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2026-05-11T16:52:50.252+08:00  INFO 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-05-11T16:52:50.270+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T16:52:50.277+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T16:52:50.402+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:52:50.406+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=36d8e7a071df4646a28e597bf9541479, ima (truncated)...]
+2026-05-11T16:52:50.468+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:53:16.804+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T16:53:16.805+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T16:53:16.812+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:53:16.812+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=e52a7a1acda9447085a4cd2c13f25f4d, ima (truncated)...]
+2026-05-11T16:53:16.814+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:03.700+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-BbDubJnM.js", parameters={}
+2026-05-11T16:54:03.705+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T16:54:03.709+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:03.872+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-Cl5lv3cx.css", parameters={}
+2026-05-11T16:54:03.873+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T16:54:03.875+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:03.898+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/org.html", parameters={}
+2026-05-11T16:54:03.899+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T16:54:03.900+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:03.914+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/departments", parameters={}
+2026-05-11T16:54:03.917+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.DepartmentController#list()
+2026-05-11T16:54:03.982+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:03.984+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[Department(id=5, name=市场部, parentId=null, managerId=7, status= (truncated)...]
+2026-05-11T16:54:03.989+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.043+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/api/employees", parameters={}
+2026-05-11T16:54:04.044+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.EmployeeController#list()
+2026-05-11T16:54:04.050+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.052+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[Employee(id=8, empNo=E5002, name=孙怡, gender=F, phone=138000050 (truncated)...]
+2026-05-11T16:54:04.055+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.072+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/attendance", parameters={}
+2026-05-11T16:54:04.073+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.AttendanceController#list()
+2026-05-11T16:54:04.077+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.078+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[AttendanceRecord(id=3, empId=1, workDate=2026-03-23, checkIn=2 (truncated)...]
+2026-05-11T16:54:04.080+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.097+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/api/leave", parameters={}
+2026-05-11T16:54:04.097+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.LeaveController#list()
+2026-05-11T16:54:04.102+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.105+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[LeaveRequest(id=2, empId=8, leaveType=病假, startTime=2026-03-10 (truncated)...]
+2026-05-11T16:54:04.109+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.125+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/performance/cycles", parameters={}
+2026-05-11T16:54:04.125+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.PerformanceController#listCycles()
+2026-05-11T16:54:04.132+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.133+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[PerformanceCycle(id=1, name=2026 Q1 绩效考核, startDate=2026-01-01 (truncated)...]
+2026-05-11T16:54:04.135+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.149+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/api/payroll/employee/1", parameters={}
+2026-05-11T16:54:04.150+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.PayrollController#listByEmp(Long)
+2026-05-11T16:54:04.160+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.160+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[PayrollRecord(id=1, empId=1, cycleMonth=2026-03, grossSalary=1 (truncated)...]
+2026-05-11T16:54:04.163+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.181+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/rbac/users", parameters={}
+2026-05-11T16:54:04.182+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.RbacController#listUsers()
+2026-05-11T16:54:04.187+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.188+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[SysUser(id=3, username=admin2, passwordHash=$2a$10$WuX717mxz2f (truncated)...]
+2026-05-11T16:54:04.190+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.205+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/permissions", parameters={}
+2026-05-11T16:54:04.205+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.PermissionController#list()
+2026-05-11T16:54:04.211+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.211+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[Permission(id=1, permKey=rbac:manage, permName=权限管理), Permissi (truncated)...]
+2026-05-11T16:54:04.213+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.230+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/api/org/levels", parameters={}
+2026-05-11T16:54:04.230+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.OrgController#levels()
+2026-05-11T16:54:04.233+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.235+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[JobLevel(id=1, levelCode=L1, levelName=初级, rank=1, salaryMin=5 (truncated)...]
+2026-05-11T16:54:04.237+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.260+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/api/org/positions", parameters={}
+2026-05-11T16:54:04.261+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.OrgController#positions()
+2026-05-11T16:54:04.264+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.265+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[JobPosition(id=12, deptId=5, levelId=5, positionCode=MKT-MGR,  (truncated)...]
+2026-05-11T16:54:04.267+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:54:04.286+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/org/paths", parameters={}
+2026-05-11T16:54:04.286+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.OrgController#paths()
+2026-05-11T16:54:04.290+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:54:04.290+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[PromotionPath(id=7, fromPositionId=4, toPositionId=5, minMonth (truncated)...]
+2026-05-11T16:54:04.292+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T16:57:37.375+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T16:57:37.376+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T16:57:37.383+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T16:57:37.383+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=09077935a78448f7a4a7fa3b9ec37d7a, ima (truncated)...]
+2026-05-11T16:57:37.384+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:01:24.424+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/rbac/users", parameters={}
+2026-05-11T17:01:24.425+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.controller.RbacController#listUsers()
+2026-05-11T17:01:24.429+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T17:01:24.430+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=[SysUser(id=3, username=admin2, passwordHash=$2a$10$WuX717mxz2f (truncated)...]
+2026-05-11T17:01:24.431+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:35.878+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-05-11T17:11:35.884+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.web.SpaForwardController#forwardIndex()
+2026-05-11T17:11:35.897+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
+2026-05-11T17:11:35.898+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.w.servlet.view.InternalResourceView  : View name [forward:], model {}
+2026-05-11T17:11:35.904+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.w.servlet.view.InternalResourceView  : Forwarding to [/index.html]
+2026-05-11T17:11:35.922+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : "FORWARD" dispatch for GET "/index.html", parameters={}
+2026-05-11T17:11:35.927+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:35.933+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Exiting from "FORWARD" dispatch, status 200
+2026-05-11T17:11:35.934+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:35.991+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-BbDubJnM.js?v=5", parameters={masked}
+2026-05-11T17:11:35.993+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:35.999+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:36.029+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T17:11:36.031+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T17:11:36.041+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T17:11:36.042+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=0eb20dc378d944fda69c216be66b4e2f, ima (truncated)...]
+2026-05-11T17:11:36.043+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:36.044+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-11T17:11:36.046+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:36.047+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-11T17:11:36.051+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.hrm.common.exception.GlobalExceptionHandler#handleOther(Exception)
+2026-05-11T17:11:36.052+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-11T17:11:36.053+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=50000, message=No static resource favicon.ico for request '/favicon.ico'., data=nul (truncated)...]
+2026-05-11T17:11:36.060+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico for request '/favicon.ico'.]
+2026-05-11T17:11:36.061+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.278+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-05-11T17:11:37.279+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.web.SpaForwardController#forwardIndex()
+2026-05-11T17:11:37.280+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
+2026-05-11T17:11:37.281+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.w.servlet.view.InternalResourceView  : View name [forward:], model {}
+2026-05-11T17:11:37.281+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.w.servlet.view.InternalResourceView  : Forwarding to [/index.html]
+2026-05-11T17:11:37.283+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : "FORWARD" dispatch for GET "/index.html", parameters={}
+2026-05-11T17:11:37.285+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.288+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Exiting from "FORWARD" dispatch, status 200
+2026-05-11T17:11:37.289+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.322+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-BbDubJnM.js?v=5", parameters={masked}
+2026-05-11T17:11:37.323+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.329+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.356+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T17:11:37.357+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T17:11:37.358+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-11T17:11:37.360+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.360+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-11T17:11:37.362+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.hrm.common.exception.GlobalExceptionHandler#handleOther(Exception)
+2026-05-11T17:11:37.363+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-11T17:11:37.364+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=50000, message=No static resource favicon.ico for request '/favicon.ico'., data=nul (truncated)...]
+2026-05-11T17:11:37.365+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico for request '/favicon.ico'.]
+2026-05-11T17:11:37.366+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.371+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T17:11:37.371+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=c894484835354f09be745fb771384be0, ima (truncated)...]
+2026-05-11T17:11:37.373+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.635+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-05-11T17:11:37.645+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.web.SpaForwardController#forwardIndex()
+2026-05-11T17:11:37.647+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
+2026-05-11T17:11:37.648+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.w.servlet.view.InternalResourceView  : View name [forward:], model {}
+2026-05-11T17:11:37.649+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.w.servlet.view.InternalResourceView  : Forwarding to [/index.html]
+2026-05-11T17:11:37.651+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : "FORWARD" dispatch for GET "/index.html", parameters={}
+2026-05-11T17:11:37.654+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.657+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Exiting from "FORWARD" dispatch, status 200
+2026-05-11T17:11:37.658+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.703+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-BbDubJnM.js?v=5", parameters={masked}
+2026-05-11T17:11:37.706+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.718+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.767+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T17:11:37.769+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T17:11:37.784+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-11T17:11:37.786+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.787+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T17:11:37.788+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-11T17:11:37.789+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=43e8927ba3594afab011d07303d556e9, ima (truncated)...]
+2026-05-11T17:11:37.790+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.hrm.common.exception.GlobalExceptionHandler#handleOther(Exception)
+2026-05-11T17:11:37.791+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-11T17:11:37.791+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.792+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=50000, message=No static resource favicon.ico for request '/favicon.ico'., data=nul (truncated)...]
+2026-05-11T17:11:37.795+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico for request '/favicon.ico'.]
+2026-05-11T17:11:37.796+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.842+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-05-11T17:11:37.843+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.web.SpaForwardController#forwardIndex()
+2026-05-11T17:11:37.844+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
+2026-05-11T17:11:37.845+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.w.servlet.view.InternalResourceView  : View name [forward:], model {}
+2026-05-11T17:11:37.845+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.w.servlet.view.InternalResourceView  : Forwarding to [/index.html]
+2026-05-11T17:11:37.846+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : "FORWARD" dispatch for GET "/index.html", parameters={}
+2026-05-11T17:11:37.848+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.851+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Exiting from "FORWARD" dispatch, status 200
+2026-05-11T17:11:37.852+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.888+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-BbDubJnM.js?v=5", parameters={masked}
+2026-05-11T17:11:37.889+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.894+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.924+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T17:11:37.925+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T17:11:37.927+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-11T17:11:37.929+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:11:37.929+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-11T17:11:37.930+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.hrm.common.exception.GlobalExceptionHandler#handleOther(Exception)
+2026-05-11T17:11:37.932+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-11T17:11:37.934+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=50000, message=No static resource favicon.ico for request '/favicon.ico'., data=nul (truncated)...]
+2026-05-11T17:11:37.935+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico for request '/favicon.ico'.]
+2026-05-11T17:11:37.936+08:00 DEBUG 28868 --- [hrm] [io-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:11:37.936+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T17:11:37.937+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=0439cfa6c880409e8082cdc5fad2c5c8, ima (truncated)...]
+2026-05-11T17:11:37.940+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:12:14.071+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/login", parameters={}
+2026-05-11T17:12:14.074+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.web.SpaForwardController#forwardIndex()
+2026-05-11T17:12:14.077+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
+2026-05-11T17:12:14.077+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.w.servlet.view.InternalResourceView  : View name [forward:], model {}
+2026-05-11T17:12:14.078+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.w.servlet.view.InternalResourceView  : Forwarding to [/index.html]
+2026-05-11T17:12:14.080+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : "FORWARD" dispatch for GET "/index.html", parameters={}
+2026-05-11T17:12:14.081+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:12:14.089+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Exiting from "FORWARD" dispatch, status 200
+2026-05-11T17:12:14.090+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:12:14.124+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/assets/index-BbDubJnM.js?v=5", parameters={masked}
+2026-05-11T17:12:14.126+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:12:14.134+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:12:14.158+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T17:12:14.159+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T17:12:14.162+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
+2026-05-11T17:12:14.164+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [static/]]
+2026-05-11T17:12:14.165+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2026-05-11T17:12:14.166+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] .m.m.a.ExceptionHandlerExceptionResolver : Using @ExceptionHandler com.hrm.common.exception.GlobalExceptionHandler#handleOther(Exception)
+2026-05-11T17:12:14.168+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
+2026-05-11T17:12:14.169+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=50000, message=No static resource favicon.ico for request '/favicon.ico'., data=nul (truncated)...]
+2026-05-11T17:12:14.171+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T17:12:14.172+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=5de3ce9699dd4766aa1d3efa4c4f15fc, ima (truncated)...]
+2026-05-11T17:12:14.171+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico for request '/favicon.ico'.]
+2026-05-11T17:12:14.173+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:12:14.174+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-05-11T17:12:29.562+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/auth/captcha", parameters={}
+2026-05-11T17:12:29.562+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.hrm.auth.AuthController#captcha()
+2026-05-11T17:12:29.566+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2026-05-11T17:12:29.567+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [ApiResponse(code=0, message=OK, data=CaptchaResponse(captchaId=099a1a84e73549d0a654416c8b10b3cb, ima (truncated)...]
+2026-05-11T17:12:29.568+08:00 DEBUG 28868 --- [hrm] [nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK

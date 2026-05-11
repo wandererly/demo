@@ -6,6 +6,7 @@ import com.hrm.domain.Department;
 import com.hrm.dto.DepartmentCreateRequest;
 import com.hrm.dto.DepartmentUpdateRequest;
 import com.hrm.mapper.DepartmentMapper;
+import com.hrm.service.AuditLogService;
 import com.hrm.service.DepartmentService;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import org.springframework.stereotype.Service;
 public class DepartmentServiceImpl implements DepartmentService {
 
 	private final DepartmentMapper departmentMapper;
+	private final AuditLogService auditLogService;
 
-	public DepartmentServiceImpl(DepartmentMapper departmentMapper) {
+	public DepartmentServiceImpl(DepartmentMapper departmentMapper, AuditLogService auditLogService) {
 		this.departmentMapper = departmentMapper;
+		this.auditLogService = auditLogService;
 	}
 
 	@Override
@@ -41,6 +44,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 		department.setManagerId(request.getManagerId());
 		department.setStatus(request.getStatus() == null ? "ACTIVE" : request.getStatus());
 		departmentMapper.insert(department);
+		auditLogService.record("部门", "新增", "department", department.getId(), department.getName());
 		return department;
 	}
 
@@ -52,6 +56,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 		existing.setManagerId(request.getManagerId() == null ? existing.getManagerId() : request.getManagerId());
 		existing.setStatus(request.getStatus() == null ? existing.getStatus() : request.getStatus());
 		departmentMapper.update(existing);
+		auditLogService.record("部门", "更新", "department", existing.getId(), existing.getName());
 		return existing;
 	}
 
@@ -61,5 +66,6 @@ public class DepartmentServiceImpl implements DepartmentService {
 		if (rows == 0) {
 			throw new BizException(ErrorCode.NOT_FOUND, "Department not found");
 		}
+		auditLogService.record("部门", "删除", "department", id, null);
 	}
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 @Data
@@ -19,6 +20,7 @@ public class LeaveCreateRequest {
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
 	private LocalDateTime endTime;
 	@NotNull(message = "请假天数不能为空")
+	@PositiveOrZero(message = "请假天数不能为负数")
 	private Double days;
 	private String reason;
 }

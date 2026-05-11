@@ -84,6 +84,7 @@ public class AuthController {
 		LoginResponse resp = new LoginResponse();
 		resp.setUsername(user.getUsername());
 		resp.setRole(user.getRole());
+		resp.setEmpId(user.getEmpId());
 		resp.setPermissions(perms);
 		resp.setToken(jwtUtil.generateToken(user.getUsername(), user.getRole(), perms));
 		loginAttemptService.reset(key);

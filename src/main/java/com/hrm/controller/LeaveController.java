@@ -47,13 +47,19 @@ public class LeaveController {
 	}
 
 	@PutMapping("/{id}")
-	public ApiResponse<LeaveRequest> update(@PathVariable Long id, @RequestBody LeaveUpdateRequest request) {
+	public ApiResponse<LeaveRequest> update(@PathVariable Long id, @Valid @RequestBody LeaveUpdateRequest request) {
 		return ApiResponse.ok(leaveService.update(id, request));
 	}
 
 	@PutMapping("/{id}/approve")
 	public ApiResponse<LeaveRequest> approve(@PathVariable Long id,
 									   @Valid @RequestBody LeaveApproveRequest request) {
+		return ApiResponse.ok(leaveService.approve(id, request));
+	}
+
+	@PostMapping("/{id}/approve")
+	public ApiResponse<LeaveRequest> approveByPost(@PathVariable Long id,
+											@Valid @RequestBody LeaveApproveRequest request) {
 		return ApiResponse.ok(leaveService.approve(id, request));
 	}
 

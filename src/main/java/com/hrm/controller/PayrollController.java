@@ -39,6 +39,11 @@ public class PayrollController {
 		return ApiResponse.ok(payrollService.generate(request));
 	}
 
+	@GetMapping("/records")
+	public ApiResponse<List<PayrollRecord>> list() {
+		return ApiResponse.ok(payrollService.list());
+	}
+
 	@GetMapping("/employee/{empId}")
 	public ApiResponse<List<PayrollRecord>> listByEmp(@PathVariable Long empId) {
 		return ApiResponse.ok(payrollService.listByEmp(empId));

@@ -1,6 +1,8 @@
 package com.hrm.dto;
 
 import java.math.BigDecimal;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -8,16 +10,23 @@ import lombok.Data;
 public class SalaryStructureUpsertRequest {
 	@NotNull(message = "Employee ID is required")
 	private Long empId;
-	@NotNull(message = "Base salary is required")
+	@NotNull(message = "基本工资不能为空")
+	@DecimalMin(value = "3500.00", message = "基本工资不能低于3500")
 	private BigDecimal baseSalary;
-	@NotNull(message = "Allowance is required")
+	@NotNull(message = "津贴不能为空")
+	@DecimalMin(value = "0.00", message = "津贴不能为负数")
 	private BigDecimal allowance;
-	@NotNull(message = "Bonus is required")
+	@NotNull(message = "奖金不能为空")
+	@DecimalMin(value = "0.00", message = "奖金不能为负数")
 	private BigDecimal bonus;
-	@NotNull(message = "Social security is required")
+	@NotNull(message = "社保不能为空")
+	@DecimalMin(value = "0.00", message = "社保不能为负数")
 	private BigDecimal socialSecurity;
-	@NotNull(message = "Housing fund is required")
+	@NotNull(message = "公积金不能为空")
+	@DecimalMin(value = "0.00", message = "公积金不能为负数")
 	private BigDecimal housingFund;
-	@NotNull(message = "Tax rate is required")
+	@NotNull(message = "税率不能为空")
+	@DecimalMin(value = "0.00", message = "税率不能为负数")
+	@DecimalMax(value = "1.00", message = "税率不能超过100%")
 	private BigDecimal taxRate;
 }

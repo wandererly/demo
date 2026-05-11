@@ -6,6 +6,7 @@ import com.hrm.domain.Employee;
 import com.hrm.dto.EmployeeCreateRequest;
 import com.hrm.dto.EmployeeUpdateRequest;
 import com.hrm.mapper.EmployeeMapper;
+import com.hrm.service.AuditLogService;
 import com.hrm.service.EmployeeService;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import org.springframework.stereotype.Service;
 public class EmployeeServiceImpl implements EmployeeService {
 
 	private final EmployeeMapper employeeMapper;
+	private final AuditLogService auditLogService;
 
-	public EmployeeServiceImpl(EmployeeMapper employeeMapper) {
+	public EmployeeServiceImpl(EmployeeMapper employeeMapper, AuditLogService auditLogService) {
 		this.employeeMapper = employeeMapper;
+		this.auditLogService = auditLogService;
 	}
 
 	@Override
@@ -47,6 +50,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		employee.setStatus(request.getStatus() == null ? "ACTIVE" : request.getStatus());
 		employee.setBaseSalary(request.getBaseSalary());
 		employeeMapper.insert(employee);
+		auditLogService.record("员工", "新增", "employee", employee.getId(), employee.getName());
 		return employee;
 	}
 
@@ -63,6 +67,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		existing.setStatus(request.getStatus() == null ? existing.getStatus() : request.getStatus());
 		existing.setBaseSalary(request.getBaseSalary() == null ? existing.getBaseSalary() : request.getBaseSalary());
 		employeeMapper.update(existing);
+		auditLogService.record("员工", "更新", "employee", existing.getId(), existing.getName());
 		return existing;
 	}
 
@@ -72,5 +77,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 		if (rows == 0) {
 			throw new BizException(ErrorCode.NOT_FOUND, "Employee not found");
 		}
+		auditLogService.record("员工", "删除", "employee", id, null);
 	}
 }

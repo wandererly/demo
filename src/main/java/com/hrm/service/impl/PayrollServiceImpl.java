@@ -13,6 +13,7 @@ import com.hrm.mapper.PayrollRecordMapper;
 import com.hrm.mapper.PayrollRuleMapper;
 import com.hrm.mapper.PayrollTaxBracketMapper;
 import com.hrm.mapper.SalaryStructureMapper;
+import com.hrm.service.AuditLogService;
 import com.hrm.service.PayrollService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,15 +27,18 @@ public class PayrollServiceImpl implements PayrollService {
 	private final PayrollRecordMapper payrollRecordMapper;
 	private final PayrollRuleMapper payrollRuleMapper;
 	private final PayrollTaxBracketMapper payrollTaxBracketMapper;
+	private final AuditLogService auditLogService;
 
 	public PayrollServiceImpl(SalaryStructureMapper salaryStructureMapper,
 							  PayrollRecordMapper payrollRecordMapper,
 							  PayrollRuleMapper payrollRuleMapper,
-							  PayrollTaxBracketMapper payrollTaxBracketMapper) {
+							  PayrollTaxBracketMapper payrollTaxBracketMapper,
+							  AuditLogService auditLogService) {
 		this.salaryStructureMapper = salaryStructureMapper;
 		this.payrollRecordMapper = payrollRecordMapper;
 		this.payrollRuleMapper = payrollRuleMapper;
 		this.payrollTaxBracketMapper = payrollTaxBracketMapper;
+		this.auditLogService = auditLogService;
 	}
 
 	@Override
@@ -151,7 +155,13 @@ public class PayrollServiceImpl implements PayrollService {
 		record.setLeaveDeduction(calcResult.getLeaveDeduction());
 		record.setStatus("CALCULATED");
 		payrollRecordMapper.insert(record);
+		auditLogService.record("薪酬", "生成薪酬", "payroll_record", record.getId(), "员工ID " + record.getEmpId() + " / " + record.getCycleMonth());
 		return record;
+	}
+
+	@Override
+	public List<PayrollRecord> list() {
+		return payrollRecordMapper.findAll();
 	}
 
 	@Override

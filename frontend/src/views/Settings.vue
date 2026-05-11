@@ -3,8 +3,8 @@
     <section class="card">
       <h3>请假规则</h3>
       <div class="form-grid">
-        <input class="input" v-model="leaveRule.maxDaysPerRequest" placeholder="单次最大天数" />
-        <input class="input" v-model="leaveRule.approvalLevel" placeholder="审批级别(1/2)" />
+        <input class="input" type="number" v-model="leaveRule.maxDaysPerRequest" placeholder="单次最大天数" min="0" step="1" />
+        <input class="input" type="number" v-model="leaveRule.approvalLevel" placeholder="审批级别(1/2)" />
       </div>
       <div class="actions">
         <button class="btn" @click="saveLeaveRule">保存规则</button>
@@ -16,8 +16,8 @@
     <section class="card">
       <h3>绩效等级规则</h3>
       <div class="form-grid">
-        <input class="input" v-model="perfRuleForm.minScore" placeholder="最低分" />
-        <input class="input" v-model="perfRuleForm.maxScore" placeholder="最高分" />
+        <input class="input" type="number" v-model="perfRuleForm.minScore" placeholder="最低分(0-100)" min="0" max="100" step="1" />
+        <input class="input" type="number" v-model="perfRuleForm.maxScore" placeholder="最高分(0-100)" min="0" max="100" step="1" />
         <input class="input" v-model="perfRuleForm.level" placeholder="等级(A/B/C)" />
       </div>
       <div class="actions">
@@ -47,7 +47,7 @@
     <section class="card">
       <h3>薪酬规则</h3>
       <div class="form-grid">
-        <input class="input" v-model="payrollRule.overtimeMultiplier" placeholder="加班倍率(1.5)" />
+        <input class="input" type="number" v-model="payrollRule.overtimeMultiplier" placeholder="加班倍率(1.5)" min="0" step="0.1" />
       </div>
       <div class="actions">
         <button class="btn" @click="savePayrollRule">保存规则</button>
@@ -59,9 +59,9 @@
     <section class="card">
       <h3>税率区间</h3>
       <div class="form-grid">
-        <input class="input" v-model="taxForm.minIncome" placeholder="最低收入" />
-        <input class="input" v-model="taxForm.maxIncome" placeholder="最高收入(可空)" />
-        <input class="input" v-model="taxForm.rate" placeholder="税率(0.1)" />
+        <input class="input" type="number" v-model="taxForm.minIncome" placeholder="最低收入" min="0" step="100" />
+        <input class="input" type="number" v-model="taxForm.maxIncome" placeholder="最高收入(可空)" min="0" step="100" />
+        <input class="input" type="number" v-model="taxForm.rate" placeholder="税率% (10表示10%)" min="0" max="100" step="1" />
       </div>
       <div class="actions">
         <button class="btn" @click="addBracket">新增区间</button>
@@ -80,7 +80,7 @@
           <tr v-for="item in brackets" :key="item.id">
             <td>{{ item.id }}</td>
             <td>{{ item.minIncome }} - {{ item.maxIncome || '?' }}</td>
-            <td>{{ item.rate }}</td>
+            <td>{{ rateToPercent(item.rate) }}%</td>
             <td><button class="btn-danger btn" @click="removeBracket(item.id)">删除</button></td>
           </tr>
         </tbody>
@@ -88,14 +88,6 @@
       <div v-if="error" class="alert">{{ error }}</div>
     </section>
 
-    <section class="card">
-      <h3>初始化演示数据</h3>
-      <p style="color:var(--muted)">一键初始化示例数据，便于体验系统功能</p>
-      <div class="actions">
-        <button class="btn" @click="initDemo">初始化数据</button>
-      </div>
-      <div v-if="demoMsg" class="badge">{{ demoMsg }}</div>
-    </section>
   </div>
 </template>
 
@@ -118,7 +110,10 @@ const payrollRuleId = ref(null)
 const taxForm = ref({ minIncome: '', maxIncome: '', rate: '' })
 const brackets = ref([])
 
-const demoMsg = ref('')
+const rateToPercent = (value) => {
+  const n = Number(value)
+  return Number.isFinite(n) ? n * 100 : '-'
+}
 
 const loadLeaveRule = async () => {
   error.value = ''
@@ -171,6 +166,7 @@ const createPerfRule = async () => {
 }
 
 const removePerfRule = async (id) => {
+  if (!confirm('确定要删除该绩效规则吗？此操作不可撤销。')) return
   error.value = ''
   try {
     await http.del(`/api/rules/performance/${id}`)
@@ -227,7 +223,7 @@ const addBracket = async () => {
     await http.post(`/api/rules/payroll/${payrollRuleId.value}/brackets`, {
       minIncome: Number(taxForm.value.minIncome),
       maxIncome: taxForm.value.maxIncome === '' ? null : Number(taxForm.value.maxIncome),
-      rate: Number(taxForm.value.rate)
+      rate: Number(taxForm.value.rate) / 100
     })
     taxForm.value = { minIncome: '', maxIncome: '', rate: '' }
     await loadBrackets()
@@ -237,21 +233,11 @@ const addBracket = async () => {
 }
 
 const removeBracket = async (id) => {
+  if (!confirm('确定要删除该税率区间吗？此操作不可撤销。')) return
   error.value = ''
   try {
     await http.del(`/api/rules/payroll/brackets/${id}`)
     await loadBrackets()
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
-const initDemo = async () => {
-  error.value = ''
-  demoMsg.value = ''
-  try {
-    const msg = await http.post('/api/demo/init', {})
-    demoMsg.value = msg
   } catch (e) {
     error.value = e.message
   }
