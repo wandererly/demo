@@ -11,7 +11,7 @@
         <input class="input" v-model="form.email" placeholder="邮箱" />
         <input class="input" v-model="form.deptId" placeholder="部门ID" />
         <input class="input" v-model="form.position" placeholder="岗位" />
-        <input class="input" v-model="form.hireDate" placeholder="入职日期 YYYY-MM-DD" />
+        <input class="input" v-model="form.hireDate" placeholder="入职日期 YYYYY-MM-DD" />
         <input class="input" v-model="form.baseSalary" placeholder="基础薪资" />
       </div>
       <div class="actions">
@@ -31,7 +31,7 @@
         <input class="input" v-model="editForm.email" placeholder="邮箱" />
         <input class="input" v-model="editForm.deptId" placeholder="部门ID" />
         <input class="input" v-model="editForm.position" placeholder="岗位" />
-        <input class="input" v-model="editForm.hireDate" placeholder="入职日期 YYYY-MM-DD" />
+        <input class="input" v-model="editForm.hireDate" placeholder="入职日期 YYYYY-MM-DD" />
         <input class="input" v-model="editForm.status" placeholder="状态" />
         <input class="input" v-model="editForm.baseSalary" placeholder="基础薪资" />
       </div>
@@ -197,6 +197,7 @@ const update = async () => {
 }
 
 const remove = async (id) => {
+  if (!confirm('确定要删除该员工吗？此操作不可撤销。')) return
   error.value = ''
   try {
     await http.del(`/api/employees/${id}`)

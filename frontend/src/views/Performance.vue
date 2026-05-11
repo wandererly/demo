@@ -4,8 +4,8 @@
       <h3>绩效周期</h3>
       <div class="form-grid">
         <input class="input" v-model="cycleForm.name" placeholder="周期名称" />
-        <input class="input" v-model="cycleForm.startDate" placeholder="开始日期 YYYY-MM-DD" />
-        <input class="input" v-model="cycleForm.endDate" placeholder="结束日期 YYYY-MM-DD" />
+        <input class="input" v-model="cycleForm.startDate" placeholder="开始日期 YYYYY-MM-DD" />
+        <input class="input" v-model="cycleForm.endDate" placeholder="结束日期 YYYYY-MM-DD" />
       </div>
       <div class="actions">
         <button class="btn" @click="createCycle">新增周期</button>

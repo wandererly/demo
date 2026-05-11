@@ -2,7 +2,7 @@ export const TOKEN_KEY = 'hrm_token'
 export const USER_KEY = 'hrm_user'
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY) || ''
+  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || ''
 }
 
 export function setToken(token, remember) {

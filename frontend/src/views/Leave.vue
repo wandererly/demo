@@ -5,8 +5,8 @@
       <div class="form-grid">
         <input class="input" v-model="form.empId" placeholder="员工ID" />
         <input class="input" v-model="form.leaveType" placeholder="请假类型(年假/病假)" />
-        <input class="input" v-model="form.startTime" placeholder="开始时间 YYYY-MM-DDTHH:mm" />
-        <input class="input" v-model="form.endTime" placeholder="结束时间 YYYY-MM-DDTHH:mm" />
+        <input class="input" v-model="form.startTime" placeholder="开始时间 YYYYY-MM-DDTHH:mm" />
+        <input class="input" v-model="form.endTime" placeholder="结束时间 YYYYY-MM-DDTHH:mm" />
         <input class="input" v-model="form.days" placeholder="天数" />
         <input class="input" v-model="form.reason" placeholder="原因" />
       </div>
@@ -132,7 +132,7 @@ const pagedList = computed(() => {
 const load = async () => {
   error.value = ''
   try {
-    list.value = await http.get('/api/leaves')
+    list.value = await http.get('/api/leave')
     page.value = 1
   } catch (e) {
     error.value = e.message
@@ -142,7 +142,7 @@ const load = async () => {
 const create = async () => {
   error.value = ''
   try {
-    await http.post('/api/leaves', {
+    await http.post('/api/leave', {
       empId: form.value.empId ? Number(form.value.empId) : null,
       leaveType: form.value.leaveType,
       startTime: form.value.startTime,
@@ -173,7 +173,7 @@ const pick = (item) => {
 const update = async () => {
   error.value = ''
   try {
-    await http.put(`/api/leaves/${editForm.value.id}`, {
+    await http.put(`/api/leave/${editForm.value.id}`, {
       leaveType: editForm.value.leaveType || null,
       startTime: editForm.value.startTime || null,
       endTime: editForm.value.endTime || null,
@@ -191,7 +191,7 @@ const update = async () => {
 const approveLeave = async () => {
   error.value = ''
   try {
-    await http.post(`/api/leaves/${approve.value.id}/approve`, {
+    await http.post(`/api/leave/${approve.value.id}/approve`, {
       approverId: approve.value.approverId ? Number(approve.value.approverId) : null,
       status: approve.value.status
     })
@@ -202,9 +202,10 @@ const approveLeave = async () => {
 }
 
 const remove = async (id) => {
+  if (!confirm('确定要删除该请假记录吗？此操作不可撤销。')) return
   error.value = ''
   try {
-    await http.del(`/api/leaves/${id}`)
+    await http.del(`/api/leave/${id}`)
     await load()
   } catch (e) {
     error.value = e.message

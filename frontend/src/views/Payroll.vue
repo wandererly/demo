@@ -42,7 +42,7 @@
       <h3>生成薪资</h3>
       <div class="form-grid">
         <input class="input" v-model="genForm.empId" placeholder="员工ID" />
-        <input class="input" v-model="genForm.cycleMonth" placeholder="周期 YYYY-MM" />
+        <input class="input" v-model="genForm.cycleMonth" placeholder="周期 YYYYY-MM" />
         <input class="input" v-model="genForm.overtimeHours" placeholder="加班小时" />
         <input class="input" v-model="genForm.overtimeRate" placeholder="加班倍率" />
         <input class="input" v-model="genForm.leaveDays" placeholder="请假天数" />

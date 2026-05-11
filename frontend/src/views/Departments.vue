@@ -154,6 +154,7 @@ const update = async () => {
 }
 
 const remove = async (id) => {
+  if (!confirm('确定要删除该部门吗？此操作不可撤销。')) return
   error.value = ''
   try {
     await http.del(`/api/departments/${id}`)

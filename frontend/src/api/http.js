@@ -12,10 +12,13 @@ async function request(path, options = {}) {
     },
     ...options
   })
-  const data = await res.json()
-  if (!res.ok || (data && data.code && data.code !== 0)) {
-    const msg = data && data.message ? data.message : 'Request failed'
+  if (!res.ok) {
+    const msg = `HTTP ${res.status}: ${res.statusText}`
     throw new Error(msg)
+  }
+  const data = await res.json()
+  if (data && data.code && data.code !== 0) {
+    throw new Error(data.message || 'Request failed')
   }
   return data.data
 }

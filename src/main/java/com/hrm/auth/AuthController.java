@@ -8,10 +8,6 @@ import com.hrm.mapper.SysUserMapper;
 import com.hrm.security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-import javax.sql.DataSource;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,34 +21,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	private static final Logger log = LoggerFactory.getLogger(AuthController.class);
-	private static final String DEV_RESET_PASSWORD = "Admin123!";
-
 	private final SysUserMapper sysUserMapper;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final CaptchaService captchaService;
 	private final LoginAttemptService loginAttemptService;
 	private final AuthPermissionService authPermissionService;
-    private final DataSource dataSource;
-    private final JdbcTemplate jdbcTemplate;
 
 	public AuthController(SysUserMapper sysUserMapper,
-					  PasswordEncoder passwordEncoder,
-					  JwtUtil jwtUtil,
-					  CaptchaService captchaService,
-					  LoginAttemptService loginAttemptService,
-					  AuthPermissionService authPermissionService,
-                      DataSource dataSource,
-                      JdbcTemplate jdbcTemplate) {
+						  PasswordEncoder passwordEncoder,
+						  JwtUtil jwtUtil,
+						  CaptchaService captchaService,
+						  LoginAttemptService loginAttemptService,
+						  AuthPermissionService authPermissionService) {
 		this.sysUserMapper = sysUserMapper;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtUtil = jwtUtil;
 		this.captchaService = captchaService;
 		this.loginAttemptService = loginAttemptService;
 		this.authPermissionService = authPermissionService;
-        this.dataSource = dataSource;
-        this.jdbcTemplate = jdbcTemplate;
 	}
 
 	@GetMapping("/captcha")
@@ -70,11 +57,11 @@ public class AuthController {
 			throw new BizException(ErrorCode.FORBIDDEN, "尝试次数过多，请在 " + secs + " 秒后重试");
 		}
 
-		// Captcha disabled by request.
+		if (!captchaService.validate(request.getCaptchaId(), request.getCaptchaCode())) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "验证码错误");
+		}
 
 		SysUser user = sysUserMapper.findByUsername(username);
-        logDbMeta();
-		log.info("Login attempt username={}, userFound={}, encoder={}", username, user != null, passwordEncoder.getClass().getName());
 		if (user == null) {
 			loginAttemptService.recordFailure(key);
 			throw new BizException(ErrorCode.BAD_REQUEST, "用户不存在");
@@ -83,33 +70,11 @@ public class AuthController {
 			user.setRole("ADMIN");
 			sysUserMapper.update(user);
 		}
-		String hash = user.getPasswordHash();
-		if (hash == null || hash.isBlank()) {
-			try {
-				String dbHash = jdbcTemplate.queryForObject(
-						"select password_hash from sys_user where username = ?",
-						String.class,
-						username);
-				if (dbHash != null && !dbHash.isBlank()) {
-					user.setPasswordHash(dbHash);
-					hash = dbHash;
-					log.info("Login direct hash query loaded, len={}", dbHash.length());
-				}
-			} catch (Exception e) {
-				log.warn("Login direct hash query failed", e);
-			}
+		if (user.getPasswordHash() == null || user.getPasswordHash().isBlank()) {
+			throw new BizException(ErrorCode.SERVER_ERROR, "账户密码数据异常，请联系管理员");
 		}
-        String prefix = hash == null ? "null" : (hash.length() > 10 ? hash.substring(0, 10) : hash);
-		log.info("Login hashPrefix={}, hashLen={}", prefix, hash == null ? 0 : hash.length());
 
 		boolean matches = password != null && passwordEncoder.matches(password, user.getPasswordHash());
-		if (!matches && DEV_RESET_PASSWORD.equals(password)) {
-			user.setPasswordHash(passwordEncoder.encode(password));
-			sysUserMapper.update(user);
-			matches = passwordEncoder.matches(password, user.getPasswordHash());
-			log.info("Password reset for username={}, resetOk={}", username, matches);
-		}
-		log.info("Login passwordMatch={} for username={}", matches, username);
 		if (!matches) {
 			loginAttemptService.recordFailure(key);
 			throw new BizException(ErrorCode.BAD_REQUEST, "密码错误");
@@ -156,7 +121,6 @@ public class AuthController {
 		}
 		String username = String.valueOf(auth.getPrincipal());
 		SysUser user = sysUserMapper.findByUsername(username);
-        logDbMeta();
 		return ApiResponse.ok(user);
 	}
 
@@ -167,26 +131,4 @@ public class AuthController {
 		}
 		return (username == null ? "_" : username) + "|" + ip;
 	}
-
-	private void logDbMeta() {
-		try (var conn = dataSource.getConnection()) {
-			String url = conn.getMetaData().getURL();
-			String catalog = conn.getCatalog();
-			String db = null;
-			try {
-				db = jdbcTemplate.queryForObject("select database()", String.class);
-			} catch (Exception ignored) {
-			}
-			log.info("Login DB meta url={}, catalog={}, db={}", url, catalog, db);
-		} catch (Exception e) {
-			log.warn("Login DB meta failed", e);
-		}
-	}
-
-
-
-
 }
-
-
-

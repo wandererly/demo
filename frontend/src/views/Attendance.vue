@@ -5,9 +5,9 @@
       <p style="color:var(--muted)">录入当天签到/签退信息</p>
       <div class="form-grid">
         <input class="input" v-model="form.empId" placeholder="员工ID" />
-        <input class="input" v-model="form.workDate" placeholder="工作日期 YYYY-MM-DD" />
-        <input class="input" v-model="form.checkIn" placeholder="签到时间 YYYY-MM-DDTHH:mm" />
-        <input class="input" v-model="form.checkOut" placeholder="签退时间 YYYY-MM-DDTHH:mm" />
+        <input class="input" v-model="form.workDate" placeholder="工作日期 YYYYY-MM-DD" />
+        <input class="input" v-model="form.checkIn" placeholder="签到时间 YYYYY-MM-DDTHH:mm" />
+        <input class="input" v-model="form.checkOut" placeholder="签退时间 YYYYY-MM-DDTHH:mm" />
         <input class="input" v-model="form.status" placeholder="状态(如 NORMAL)" />
       </div>
       <div class="actions">
@@ -21,7 +21,7 @@
       <h3>编辑考勤记录</h3>
       <div class="form-grid">
         <input class="input" v-model="editForm.id" placeholder="记录ID" />
-        <input class="input" v-model="editForm.workDate" placeholder="工作日期 YYYY-MM-DD" />
+        <input class="input" v-model="editForm.workDate" placeholder="工作日期 YYYYY-MM-DD" />
         <input class="input" v-model="editForm.checkIn" placeholder="签到时间" />
         <input class="input" v-model="editForm.checkOut" placeholder="签退时间" />
         <input class="input" v-model="editForm.status" placeholder="状态" />
@@ -155,6 +155,7 @@ const update = async () => {
 }
 
 const remove = async (id) => {
+  if (!confirm('确定要删除该考勤记录吗？此操作不可撤销。')) return
   error.value = ''
   try {
     await http.del(`/api/attendance/${id}`)
