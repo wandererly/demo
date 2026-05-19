@@ -11,14 +11,21 @@ import com.hrm.domain.NotificationItem;
 import com.hrm.domain.Payslip;
 import com.hrm.domain.PerformanceGoal;
 import com.hrm.domain.SysUser;
+import com.hrm.dto.AttendanceCorrectionRequest;
+import com.hrm.dto.OvertimeRequestDto;
 import com.hrm.mapper.AttendanceRecordMapper;
 import com.hrm.mapper.DepartmentMapper;
 import com.hrm.mapper.EmployeeMapper;
 import com.hrm.mapper.EnterpriseMapper;
 import com.hrm.mapper.LeaveRequestMapper;
 import com.hrm.mapper.SysUserMapper;
+import com.hrm.service.EnterpriseService;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,19 +46,22 @@ public class SelfServiceController {
 	private final AttendanceRecordMapper attendanceRecordMapper;
 	private final LeaveRequestMapper leaveRequestMapper;
 	private final EnterpriseMapper enterpriseMapper;
+	private final EnterpriseService enterpriseService;
 
 	public SelfServiceController(SysUserMapper sysUserMapper,
 								 EmployeeMapper employeeMapper,
 								 DepartmentMapper departmentMapper,
 								 AttendanceRecordMapper attendanceRecordMapper,
 								 LeaveRequestMapper leaveRequestMapper,
-								 EnterpriseMapper enterpriseMapper) {
+								 EnterpriseMapper enterpriseMapper,
+								 EnterpriseService enterpriseService) {
 		this.sysUserMapper = sysUserMapper;
 		this.employeeMapper = employeeMapper;
 		this.departmentMapper = departmentMapper;
 		this.attendanceRecordMapper = attendanceRecordMapper;
 		this.leaveRequestMapper = leaveRequestMapper;
 		this.enterpriseMapper = enterpriseMapper;
+		this.enterpriseService = enterpriseService;
 	}
 
 	@GetMapping("/profile")
@@ -62,6 +72,58 @@ public class SelfServiceController {
 	@GetMapping("/attendance")
 	public ApiResponse<List<AttendanceRecord>> attendance() {
 		return ApiResponse.ok(attendanceRecordMapper.findByEmpId(currentEmpId()));
+	}
+
+	@GetMapping("/attendance/today")
+	public ApiResponse<AttendanceRecord> todayAttendance() {
+		return ApiResponse.ok(todayRecord(currentEmpId(), false));
+	}
+
+	@PostMapping("/attendance/clock-in")
+	public ApiResponse<AttendanceRecord> clockIn() {
+		Long empId = currentEmpId();
+		AttendanceRecord record = todayRecord(empId, true);
+		if (record.getCheckIn() != null) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "今天已经完成上班打卡");
+		}
+		LocalDateTime now = LocalDateTime.now();
+		record.setCheckIn(now);
+		record.setStatus(now.toLocalTime().isAfter(LocalTime.of(9, 0)) ? "LATE" : "NORMAL");
+		attendanceRecordMapper.update(record);
+		return ApiResponse.ok(record);
+	}
+
+	@PostMapping("/attendance/clock-out")
+	public ApiResponse<AttendanceRecord> clockOut() {
+		Long empId = currentEmpId();
+		AttendanceRecord record = todayRecord(empId, true);
+		if (record.getCheckIn() == null) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "请先完成上班打卡");
+		}
+		if (record.getCheckOut() != null) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "今天已经完成下班打卡");
+		}
+		LocalDateTime now = LocalDateTime.now();
+		record.setCheckOut(now);
+		if (!"LATE".equals(record.getStatus()) && now.toLocalTime().isBefore(LocalTime.of(18, 0))) {
+			record.setStatus("EARLY_LEAVE");
+		} else if ("ABSENT".equals(record.getStatus()) || record.getStatus() == null || record.getStatus().isBlank()) {
+			record.setStatus("NORMAL");
+		}
+		attendanceRecordMapper.update(record);
+		return ApiResponse.ok(record);
+	}
+
+	@PostMapping("/attendance/corrections")
+	public ApiResponse<?> submitSelfCorrection(@RequestBody AttendanceCorrectionRequest request) {
+		request.setEmpId(currentEmpId());
+		return ApiResponse.ok(enterpriseService.submitCorrection(request));
+	}
+
+	@PostMapping("/attendance/overtime")
+	public ApiResponse<?> submitSelfOvertime(@RequestBody OvertimeRequestDto request) {
+		request.setEmpId(currentEmpId());
+		return ApiResponse.ok(enterpriseService.submitOvertime(request));
 	}
 
 	@GetMapping("/leave")
@@ -114,6 +176,19 @@ public class SelfServiceController {
 			throw new BizException(ErrorCode.NOT_FOUND, "当前账号未绑定有效员工档案");
 		}
 		return employee;
+	}
+
+	private AttendanceRecord todayRecord(Long empId, boolean createIfMissing) {
+		AttendanceRecord record = attendanceRecordMapper.findByEmpIdAndWorkDate(empId, LocalDate.now());
+		if (record != null || !createIfMissing) {
+			return record;
+		}
+		record = new AttendanceRecord();
+		record.setEmpId(empId);
+		record.setWorkDate(LocalDate.now());
+		record.setStatus("ABSENT");
+		attendanceRecordMapper.insert(record);
+		return record;
 	}
 
 	private Long currentEmpId() {
