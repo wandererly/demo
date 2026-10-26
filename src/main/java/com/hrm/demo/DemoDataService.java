@@ -11,6 +11,7 @@ import com.hrm.domain.PayrollRule;
 import com.hrm.domain.PayrollTaxBracket;
 import com.hrm.domain.PerformanceCycle;
 import com.hrm.domain.PerformanceIndicator;
+import com.hrm.domain.PerformanceGoal;
 import com.hrm.domain.PerformanceReview;
 import com.hrm.domain.PerformanceRule;
 import com.hrm.domain.PromotionPath;
@@ -20,6 +21,7 @@ import com.hrm.dto.PayrollGenerateRequest;
 import com.hrm.mapper.AttendanceRecordMapper;
 import com.hrm.mapper.DepartmentMapper;
 import com.hrm.mapper.EmployeeMapper;
+import com.hrm.mapper.EnterpriseMapper;
 import com.hrm.mapper.JobLevelMapper;
 import com.hrm.mapper.JobPositionMapper;
 import com.hrm.mapper.LeaveRequestMapper;
@@ -66,6 +68,7 @@ public class DemoDataService {
 	private final PerformanceCycleMapper performanceCycleMapper;
 	private final PerformanceIndicatorMapper performanceIndicatorMapper;
 	private final PerformanceReviewMapper performanceReviewMapper;
+	private final EnterpriseMapper enterpriseMapper;
 	private final PayrollRecordMapper payrollRecordMapper;
 	private final SysUserMapper sysUserMapper;
 	private final EmployeeAccountService employeeAccountService;
@@ -87,6 +90,7 @@ public class DemoDataService {
 						 PerformanceCycleMapper performanceCycleMapper,
 						 PerformanceIndicatorMapper performanceIndicatorMapper,
 						 PerformanceReviewMapper performanceReviewMapper,
+		EnterpriseMapper enterpriseMapper,
 						 PayrollRecordMapper payrollRecordMapper,
 						 SysUserMapper sysUserMapper,
 						 EmployeeAccountService employeeAccountService,
@@ -107,6 +111,7 @@ public class DemoDataService {
 		this.performanceCycleMapper = performanceCycleMapper;
 		this.performanceIndicatorMapper = performanceIndicatorMapper;
 		this.performanceReviewMapper = performanceReviewMapper;
+		this.enterpriseMapper = enterpriseMapper;
 		this.payrollRecordMapper = payrollRecordMapper;
 		this.sysUserMapper = sysUserMapper;
 		this.employeeAccountService = employeeAccountService;
@@ -129,8 +134,44 @@ public class DemoDataService {
 
 		PerformanceCycle cycle = ensurePerformanceCycle();
 		ensurePerformanceIndicators(cycle);
+		ensurePerformanceGoals(cycle, employees);
 		ensurePerformanceReviews(cycle, employees);
 		ensurePayroll(employees);
+	}
+
+	private void ensurePerformanceGoals(PerformanceCycle cycle, List<Employee> employees) {
+		if (cycle == null || cycle.getId() == null || employees.isEmpty()) {
+			return;
+		}
+		Long reviewerId = employees.get(0).getId();
+		String[][] goals = new String[][] {
+			{"季度核心任务达成", "完成率>=95%"},
+			{"客户满意度提升", "满意度>=90分"},
+			{"流程优化贡献", "落地优化>=2项"},
+			{"团队协作与知识分享", "分享>=1次"}
+		};
+		int[] selfScores = new int[] {88, 92, 80, 85};
+		int[] managerScores = new int[] {85, 95, 78, 88};
+		for (int i = 0; i < employees.size(); i += 1) {
+			Employee emp = employees.get(i);
+			if (emp == null || emp.getId() == null) {
+				continue;
+			}
+			if (!enterpriseMapper.listPerformanceGoalsByEmpId(emp.getId()).isEmpty()) {
+				continue;
+			}
+			String[] goal = goals[i % goals.length];
+			PerformanceGoal goalItem = new PerformanceGoal();
+			goalItem.setEmpId(emp.getId());
+			goalItem.setCycleId(cycle.getId());
+			goalItem.setGoalTitle(goal[0]);
+			goalItem.setTargetValue(goal[1]);
+			goalItem.setSelfScore(selfScores[i % selfScores.length]);
+			goalItem.setManagerScore(managerScores[i % managerScores.length]);
+			goalItem.setStatus(i % 2 == 0 ? "SELF_REVIEWED" : "GOAL_SET");
+			goalItem.setReviewerId(reviewerId);
+			enterpriseMapper.insertPerformanceGoal(goalItem);
+		}
 	}
 
 	private void ensureRules() {
