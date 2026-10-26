@@ -14,6 +14,7 @@ public class PerformanceReview {
 	private String goalSummary;
 	private String approvalStatus;
 	private Long approverId;
+	private Long assigneeUserId;
 	private LocalDateTime approvedAt;
 	private String comment;
 	private LocalDateTime createdAt;

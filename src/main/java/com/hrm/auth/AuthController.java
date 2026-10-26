@@ -7,6 +7,7 @@ import com.hrm.domain.SysUser;
 import com.hrm.mapper.SysUserMapper;
 import com.hrm.security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+/** 提供验证码、登录和当前账号信息接口。 */
 public class AuthController {
 
 	private final SysUserMapper sysUserMapper;
@@ -48,7 +50,8 @@ public class AuthController {
 	}
 
 	@PostMapping("/login")
-	public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+	public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+		// 登录顺序包含限流、验证码、账号状态和密码校验，避免无效请求直接消耗认证资源。
 		String username = request.getUsername() == null ? null : request.getUsername().trim();
 		String password = request.getPassword() == null ? null : request.getPassword().trim();
 		String key = loginKey(username, httpRequest);
@@ -65,6 +68,9 @@ public class AuthController {
 		if (user == null) {
 			loginAttemptService.recordFailure(key);
 			throw new BizException(ErrorCode.BAD_REQUEST, "用户不存在");
+		}
+		if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+			throw new BizException(ErrorCode.FORBIDDEN, "当前账号已停用");
 		}
 		if (user.getRole() == null || user.getRole().isBlank()) {
 			user.setRole("ADMIN");
@@ -89,29 +95,6 @@ public class AuthController {
 		resp.setToken(jwtUtil.generateToken(user.getUsername(), user.getRole(), perms));
 		loginAttemptService.reset(key);
 		return ApiResponse.ok(resp);
-	}
-
-	@PostMapping("/register")
-	public ApiResponse<SysUser> register(@RequestBody RegisterRequest request) {
-		String username = request.getUsername() == null ? null : request.getUsername().trim();
-		String password = request.getPassword() == null ? null : request.getPassword().trim();
-		if (username == null || username.isBlank()) {
-			throw new BizException(ErrorCode.BAD_REQUEST, "请输入用户名");
-		}
-		if (password == null || password.isBlank()) {
-			throw new BizException(ErrorCode.BAD_REQUEST, "请输入密码");
-		}
-		SysUser existing = sysUserMapper.findByUsername(username);
-		if (existing != null) {
-			throw new BizException(ErrorCode.BAD_REQUEST, "用户已存在");
-		}
-		SysUser user = new SysUser();
-		user.setUsername(username);
-		user.setPasswordHash(passwordEncoder.encode(password));
-		user.setRole("ADMIN");
-		user.setStatus("ACTIVE");
-		sysUserMapper.insert(user);
-		return ApiResponse.ok(user);
 	}
 
 	@GetMapping("/me")

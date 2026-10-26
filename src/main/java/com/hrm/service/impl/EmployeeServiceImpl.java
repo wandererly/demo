@@ -10,6 +10,7 @@ import com.hrm.dto.EmployeeView;
 import com.hrm.mapper.EmployeeMapper;
 import com.hrm.mapper.SysUserMapper;
 import com.hrm.service.AuditLogService;
+import com.hrm.service.CurrentUserService;
 import com.hrm.service.EmployeeAccountService;
 import com.hrm.service.EmployeeService;
 import java.util.ArrayList;
@@ -23,26 +24,35 @@ public class EmployeeServiceImpl implements EmployeeService {
 	private final SysUserMapper sysUserMapper;
 	private final EmployeeAccountService employeeAccountService;
 	private final AuditLogService auditLogService;
+	private final CurrentUserService currentUserService;
 
 	public EmployeeServiceImpl(EmployeeMapper employeeMapper,
 							   SysUserMapper sysUserMapper,
 							   EmployeeAccountService employeeAccountService,
-							   AuditLogService auditLogService) {
+							   AuditLogService auditLogService,
+							   CurrentUserService currentUserService) {
 		this.employeeMapper = employeeMapper;
 		this.sysUserMapper = sysUserMapper;
 		this.employeeAccountService = employeeAccountService;
 		this.auditLogService = auditLogService;
+		this.currentUserService = currentUserService;
 	}
 
 	@Override
 	public List<Employee> list() {
-		return employeeMapper.findAll();
+		List<Employee> rows = new ArrayList<>();
+		for (Employee employee : employeeMapper.findAll()) {
+			if (currentUserService.canAccessEmployee(employee.getId())) {
+				rows.add(employee);
+			}
+		}
+		return rows;
 	}
 
 	@Override
 	public List<EmployeeView> listViews() {
 		List<EmployeeView> views = new ArrayList<>();
-		for (Employee employee : employeeMapper.findAll()) {
+		for (Employee employee : list()) {
 			SysUser user = employee.getEmpNo() == null ? null : sysUserMapper.findByUsername(employeeAccountService.accountUsername(employee));
 			if (user == null && employee.getId() != null) {
 				user = sysUserMapper.findByEmpId(employee.getId());
@@ -56,7 +66,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public Employee get(Long id) {
 		Employee employee = employeeMapper.findById(id);
 		if (employee == null) {
-			throw new BizException(ErrorCode.NOT_FOUND, "Employee not found");
+			throw new BizException(ErrorCode.NOT_FOUND, "员工不存在");
+		}
+		if (!currentUserService.canAccessEmployee(employee.getId())) {
+			throw new BizException(ErrorCode.FORBIDDEN, "无权访问该员工档案");
 		}
 		return employee;
 	}
@@ -102,7 +115,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public void delete(Long id) {
 		int rows = employeeMapper.delete(id);
 		if (rows == 0) {
-			throw new BizException(ErrorCode.NOT_FOUND, "Employee not found");
+			throw new BizException(ErrorCode.NOT_FOUND, "员工不存在");
 		}
 		auditLogService.record("员工", "删除", "employee", id, null);
 	}

@@ -281,6 +281,7 @@ public class DemoDataService {
 	}
 
 	private void ensureDemoUsers(List<Employee> employees) {
+		ensureDemoUser("admin", "admin123", "ADMIN", null);
 		if (employees == null || employees.isEmpty()) {
 			return;
 		}
@@ -363,10 +364,28 @@ public class DemoDataService {
 		if (cycle == null || cycle.getId() == null) {
 			return;
 		}
-		if (!performanceIndicatorMapper.findByCycleId(cycle.getId()).isEmpty()) {
-			return;
+		// 按名称补齐指标，避免已有一条数据时跳过其余演示数据。
+		Set<String> existingNames = performanceIndicatorMapper.findByCycleId(cycle.getId()).stream()
+				.map(PerformanceIndicator::getName)
+				.filter(name -> name != null && !name.isBlank())
+				.collect(Collectors.toSet());
+		String[][] indicators = new String[][] {
+				{"目标达成", "40", "核心工作目标完成情况"},
+				{"工作质量", "30", "交付质量与问题控制情况"},
+				{"协作沟通", "20", "团队协作与跨部门沟通情况"},
+				{"创新贡献", "10", "流程改进与创新实践情况"}
+		};
+		for (String[] item : indicators) {
+			if (existingNames.contains(item[0])) {
+				continue;
+			}
+			PerformanceIndicator indicator = new PerformanceIndicator();
+			indicator.setCycleId(cycle.getId());
+			indicator.setName(item[0]);
+			indicator.setWeight(Integer.parseInt(item[1]));
+			indicator.setDescription(item[2]);
+			performanceIndicatorMapper.insert(indicator);
 		}
-		createPerformanceIndicators(cycle.getId());
 	}
 
 	private void ensurePerformanceReviews(PerformanceCycle cycle, List<Employee> employees) {

@@ -11,6 +11,7 @@ public class AuditLog {
 	private String targetType;
 	private Long targetId;
 	private String actor;
+	private String operatorUsername;
 	private String detail;
 	private String beforeValue;
 	private String afterValue;

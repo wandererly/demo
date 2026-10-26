@@ -18,6 +18,10 @@ public interface PayrollRecordMapper {
 			+ "from payroll_record where emp_id = #{empId} order by id desc")
 	List<PayrollRecord> findByEmpId(Long empId);
 
+	@Select("select id, emp_id, cycle_month, gross_salary, net_salary, tax, overtime_pay, leave_deduction, status, created_at "
+			+ "from payroll_record where emp_id = #{empId} and cycle_month = #{cycleMonth} limit 1")
+	PayrollRecord findByEmpIdAndMonth(Long empId, String cycleMonth);
+
 	@Insert("insert into payroll_record(emp_id, cycle_month, gross_salary, net_salary, tax, overtime_pay, leave_deduction, status, created_at) "
 			+ "values(#{empId}, #{cycleMonth}, #{grossSalary}, #{netSalary}, #{tax}, #{overtimePay}, #{leaveDeduction}, #{status}, now())")
 	@Options(useGeneratedKeys = true, keyProperty = "id")

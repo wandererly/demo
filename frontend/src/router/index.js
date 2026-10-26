@@ -16,6 +16,7 @@ import Login from '../views/Login.vue'
 import SelfService from '../views/SelfService.vue'
 import { getStoredToken, getPermissions, getUser } from '../auth'
 
+// 路由元数据只控制前端菜单和页面入口，后端仍会再次校验权限。
 const routes = [
   { path: '/login', component: Login, meta: { layout: 'auth' } },
   { path: '/', component: Dashboard },
@@ -43,6 +44,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
+	// 未登录用户回到登录页；员工账号默认进入自助首页，管理员进入管理首页。
   if (to.path === '/login') return true
   const token = getStoredToken()
   if (!token) return '/login'

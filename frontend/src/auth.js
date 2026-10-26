@@ -1,6 +1,7 @@
 export const TOKEN_KEY = 'hrm_token'
 export const USER_KEY = 'hrm_user'
 
+// 记住我时使用 localStorage，否则使用 sessionStorage，退出时统一清理两者。
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || ''
 }

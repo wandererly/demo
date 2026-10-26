@@ -90,6 +90,20 @@
 
     <section v-if="section === 'leave'" class="card">
       <h3>我的请假</h3>
+      <div class="mini-panel self-leave-form">
+        <h4>提交请假申请</h4>
+        <div class="form-grid">
+          <select class="input" v-model="leaveForm.leaveType">
+            <option value="ANNUAL">年假</option><option value="PERSONAL">事假</option><option value="SICK">病假</option><option value="ADJUST">调休</option>
+          </select>
+          <input class="input" type="datetime-local" v-model="leaveForm.startTime" />
+          <input class="input" type="datetime-local" v-model="leaveForm.endTime" />
+          <input class="input" type="number" min="0.5" step="0.5" v-model="leaveForm.days" placeholder="请假天数" />
+          <input class="input" v-model="leaveForm.reason" placeholder="请假原因" />
+        </div>
+        <button class="btn" @click="submitLeave">提交申请</button>
+      </div>
+      <div v-if="leaveInfo" class="badge">{{ leaveInfo }}</div>
       <table class="table"><thead><tr><th>序号</th><th>类型</th><th>开始</th><th>结束</th><th>天数</th><th>状态</th></tr></thead>
         <tbody><tr v-for="(item, idx) in leaves" :key="item.id"><td>{{ idx + 1 }}</td><td>{{ leaveType(item.leaveType) }}</td><td>{{ fmt(item.startTime) }}</td><td>{{ fmt(item.endTime) }}</td><td>{{ item.days }}</td><td>{{ approvalText(item.status) }}</td></tr></tbody>
       </table>
@@ -106,8 +120,8 @@
 
     <section v-if="section === 'payslips'" class="card">
       <h3>我的工资条</h3>
-      <table class="table"><thead><tr><th>序号</th><th>月份</th><th>基本工资</th><th>应发</th><th>实发</th><th>绩效</th><th>状态</th></tr></thead>
-        <tbody><tr v-for="(item, idx) in payslips" :key="item.id"><td>{{ idx + 1 }}</td><td>{{ item.cycleMonth }}</td><td>{{ money(item.baseSalary) }}</td><td>{{ money(item.grossSalary) }}</td><td>{{ money(item.netSalary) }}</td><td>{{ item.performanceLevel || '-' }}</td><td>{{ approvalText(item.status) }}</td></tr></tbody>
+      <table class="table"><thead><tr><th>序号</th><th>月份</th><th>基本工资</th><th>应发</th><th>实发</th><th>绩效</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody><tr v-for="(item, idx) in payslips" :key="item.id"><td>{{ idx + 1 }}</td><td>{{ item.cycleMonth }}</td><td>{{ money(item.baseSalary) }}</td><td>{{ money(item.grossSalary) }}</td><td>{{ money(item.netSalary) }}</td><td>{{ item.performanceLevel || '-' }}</td><td>{{ approvalText(item.status) }}</td><td><button class="btn-ghost" @click="exportPayslip(item)">导出</button><button class="btn-ghost" :disabled="!canAcknowledge(item)" @click="acknowledgePayslip(item)">签收</button></td></tr></tbody>
       </table>
       <div v-if="!payslips.length" class="empty-state compact">暂无工资条</div>
     </section>
@@ -158,6 +172,8 @@ const attendanceInfo = ref('')
 const today = new Date().toISOString().slice(0, 10)
 const correctionForm = ref({ workDate: today, checkIn: '', checkOut: '', reason: '' })
 const overtimeForm = ref({ workDate: today, hours: '', reason: '' })
+const leaveForm = ref({ leaveType: 'ANNUAL', startTime: '', endTime: '', days: '', reason: '' })
+const leaveInfo = ref('')
 
 const loadProfile = async () => { profile.value = await http.get('/api/self/profile') }
 const loadAttendance = async () => {
@@ -169,6 +185,22 @@ const loadAttendance = async () => {
   attendance.value = rows || []
 }
 const loadLeave = async () => { leaves.value = await http.get('/api/self/leave') || [] }
+const submitLeave = async () => {
+  error.value = ''
+  leaveInfo.value = ''
+  if (!leaveForm.value.startTime || !leaveForm.value.endTime || !leaveForm.value.days) {
+    error.value = '请填写请假时间和天数'
+    return
+  }
+  try {
+    await http.post('/api/self/leave', { ...leaveForm.value, days: Number(leaveForm.value.days) })
+    leaveForm.value = { leaveType: 'ANNUAL', startTime: '', endTime: '', days: '', reason: '' }
+    leaveInfo.value = '请假申请已提交统一审批'
+    await loadLeave()
+  } catch (e) {
+    error.value = e.message
+  }
+}
 const loadGoals = async () => { goals.value = await http.get('/api/self/performance-goals') || [] }
 const loadPayslips = async () => { payslips.value = await http.get('/api/self/payslips') || [] }
 const loadNotifications = async () => { notifications.value = await http.get('/api/self/notifications') || [] }
@@ -243,6 +275,17 @@ const submitOvertime = async () => {
   attendanceInfo.value = '加班申请已提交统一审批'
 }
 
+const acknowledgePayslip = async (item) => {
+  await http.post(`/api/self/payslips/${item.id}/acknowledge`, {})
+  await loadPayslips()
+}
+
+const exportPayslip = (item) => {
+  window.location.href = `/api/self/payslips/${item.id}/export`
+}
+
+const canAcknowledge = (item) => ['APPROVED', 'PAID'].includes(item.status)
+
 onMounted(load)
 watch(() => route.params.section, load)
 
@@ -250,7 +293,7 @@ const fmt = (value) => value ? String(value).replace('T', ' ').slice(0, 16) : '-
 const money = (value) => value == null ? '-' : Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const statusText = (value) => ({ ACTIVE: '在职', PROBATION: '试用', RESIGNED: '已离职', REGULARIZATION_PENDING: '转正待审', TRANSFER_PENDING: '调岗待审', RESIGNATION_PENDING: '离职待审' }[value] || value || '-')
 const attendanceText = (value) => ({ NORMAL: '正常', LATE: '迟到', EARLY: '早退', ABSENT: '缺勤', LEAVE: '请假' }[value] || value || '-')
-const approvalText = (value) => ({ PENDING: '待审批', PENDING_APPROVAL: '待审批', APPROVED: '已通过', REJECTED: '已驳回', PAID: '已发放' }[value] || value || '-')
+const approvalText = (value) => ({ PENDING: '待审批', PENDING_APPROVAL: '待审批', APPROVED: '已通过', REJECTED: '已驳回', PAID: '已发放', ACKNOWLEDGED: '已签收' }[value] || value || '-')
 const perfStatus = (value) => ({ GOAL_SETTING: '目标制定', SELF_REVIEW: '员工自评', MANAGER_REVIEW: '上级评审', CALIBRATING: '校准中', FINALIZED: '已定稿' }[value] || value || '-')
 const leaveType = (value) => ({ ANNUAL: '年假', PERSONAL: '事假', SICK: '病假', ADJUST: '调休', MARRIAGE: '婚假', MATERNITY: '产假', FUNERAL: '丧假' }[value] || value || '-')
 </script>

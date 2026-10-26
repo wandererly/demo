@@ -1,5 +1,6 @@
 import { clearAuth, getStoredToken } from '../auth'
 
+// 统一封装 API 地址、JWT 请求头、错误提示和登录过期处理。
 export const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
 
 async function request(path, options = {}) {
@@ -18,12 +19,14 @@ async function request(path, options = {}) {
       const body = await res.json()
       if (body && body.message) msg = body.message
     } catch (_) { /* ignore non-JSON error body */ }
-    if (res.status === 401 || res.status === 403) {
+    if (res.status === 401) {
       clearAuth()
       if (window.location.pathname !== '/login') {
         window.location.href = '/login'
       }
       msg = '登录已过期，请重新登录'
+    } else if (res.status === 403) {
+      msg = msg && !msg.startsWith('HTTP 403') ? msg : '权限不足，无法访问该功能'
     }
     throw new Error(msg)
   }

@@ -16,5 +16,7 @@ public class ContractRequest {
 	@NotNull(message = "请选择开始日期")
 	private LocalDate startDate;
 	private LocalDate endDate;
+	private LocalDate probationStartDate;
+	private LocalDate probationEndDate;
 	private String status;
 }

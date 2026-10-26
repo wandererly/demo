@@ -22,7 +22,9 @@ public class Payslip {
 	private String performanceLevel;
 	private String status;
 	private Long approverId;
+	private Long assigneeUserId;
 	private LocalDateTime approvedAt;
+	private LocalDateTime acknowledgedAt;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 }

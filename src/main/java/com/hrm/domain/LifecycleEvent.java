@@ -1,5 +1,6 @@
 package com.hrm.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -17,7 +18,11 @@ public class LifecycleEvent {
 	private LocalDate effectiveDate;
 	private String status;
 	private Long approverId;
+	private Long assigneeUserId;
 	private LocalDateTime approvedAt;
+	private BigDecimal targetSalary;
+	private String accountAction;
+	private String assetHandoverStatus;
 	private String detail;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;

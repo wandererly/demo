@@ -84,6 +84,17 @@
     <section v-if="activeTab === 'shifts'" class="card">
       <h3>班次规则</h3>
       <div class="form-grid">
+        <input class="input" type="time" v-model="ruleForm.workStartTime" />
+        <input class="input" type="time" v-model="ruleForm.workEndTime" />
+        <input class="input" type="number" v-model="ruleForm.lateGraceMinutes" placeholder="迟到宽限分钟" min="0" step="1" />
+        <input class="input" type="number" v-model="ruleForm.earlyLeaveGraceMinutes" placeholder="早退宽限分钟" min="0" step="1" />
+        <select class="input" v-model="ruleForm.generateBaselineOnWorkday">
+          <option :value="true">工作日生成基线</option>
+          <option :value="false">工作日不生成基线</option>
+        </select>
+      </div>
+      <div class="actions"><button class="btn" @click="saveRuleConfig">保存考勤规则</button></div>
+      <div class="form-grid">
         <input class="input" v-model="shiftForm.shiftName" placeholder="班次名称" />
         <input class="input" type="time" v-model="shiftForm.startTime" />
         <input class="input" type="time" v-model="shiftForm.endTime" />
@@ -141,8 +152,13 @@
       <div class="form-grid">
         <input class="input" type="month" v-model="summaryForm.cycleMonth" />
         <select class="input" v-model="summaryForm.empId"><option value="">全员</option><option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ employeeLabel(emp) }}</option></select>
+        <input class="input" v-model="monthLockForm.remark" placeholder="锁定/解锁备注" />
       </div>
-      <div class="actions"><button class="btn" @click="generateSummary">生成汇总</button></div>
+      <div class="actions">
+        <button class="btn" @click="generateSummary">生成汇总</button>
+        <button class="btn-ghost" @click="lockMonth">锁定月份</button>
+        <button class="btn-ghost" @click="unlockMonth">解锁月份</button>
+      </div>
       <table class="table" v-if="summaries.length">
         <thead><tr><th>员工</th><th>月份</th><th>出勤</th><th>迟到</th><th>早退</th><th>缺勤</th><th>请假</th><th>加班</th></tr></thead>
         <tbody><tr v-for="item in summaries" :key="item.id"><td>{{ employeeName(item.empId) }}</td><td>{{ item.cycleMonth }}</td><td>{{ item.presentDays }}</td><td>{{ item.lateCount }}</td><td>{{ item.earlyLeaveCount }}</td><td>{{ item.absentDays }}</td><td>{{ item.leaveDays }}</td><td>{{ item.overtimeHours }}</td></tr></tbody>
@@ -171,6 +187,7 @@ const holidays = ref([])
 const corrections = ref([])
 const overtimes = ref([])
 const summaries = ref([])
+const ruleForm = ref({ workStartTime: '09:00', workEndTime: '18:00', lateGraceMinutes: 0, earlyLeaveGraceMinutes: 0, absenceRule: 'NO_CHECK_IN', generateBaselineOnHoliday: false, generateBaselineOnWorkday: true })
 const error = ref('')
 const info = ref('')
 const form = ref({ empId: '', workDate: '', checkIn: '', checkOut: '', status: 'NORMAL' })
@@ -180,6 +197,7 @@ const holidayForm = ref({ holidayDate: '', holidayName: '', holidayType: 'HOLIDA
 const correctionForm = ref({ empId: '', workDate: '', checkIn: '', checkOut: '', reason: '' })
 const overtimeForm = ref({ empId: '', workDate: '', hours: '', reason: '' })
 const summaryForm = ref({ cycleMonth: new Date().toISOString().slice(0, 7), empId: '' })
+const monthLockForm = ref({ remark: '' })
 const search = ref('')
 const page = ref(1)
 const pageSize = 1
@@ -216,14 +234,15 @@ const holidayColumns = [{ key: 'holidayDate', label: '日期' }, { key: 'holiday
 
 const loadAll = async () => {
   error.value = ''
-  const [attendanceData, employeeData, shiftData, holidayData, correctionData, overtimeData, summaryData] = await Promise.all([
+  const [attendanceData, employeeData, shiftData, holidayData, correctionData, overtimeData, summaryData, ruleData] = await Promise.all([
     http.get('/api/attendance').catch(() => []),
     http.get('/api/employees').catch(() => []),
     http.get('/api/attendance-rules/shifts').catch(() => []),
     http.get('/api/attendance-rules/holidays').catch(() => []),
     http.get('/api/attendance-rules/corrections').catch(() => []),
     http.get('/api/attendance-rules/overtime').catch(() => []),
-    http.get('/api/attendance-rules/monthly-summary').catch(() => [])
+    http.get('/api/attendance-rules/monthly-summary').catch(() => []),
+    http.get('/api/attendance-rules/config').catch(() => null)
   ])
   list.value = attendanceData || []
   employees.value = employeeData || []
@@ -232,6 +251,7 @@ const loadAll = async () => {
   corrections.value = correctionData || []
   overtimes.value = overtimeData || []
   summaries.value = summaryData || []
+  if (ruleData) ruleForm.value = { ...ruleForm.value, ...ruleData }
   page.value = 1
 }
 
@@ -258,6 +278,13 @@ const createShift = async () => {
   await submit('/api/attendance-rules/shifts', { ...shiftForm.value, workHours: Number(shiftForm.value.workHours || 0) }, '班次已创建')
   shiftForm.value = { shiftName: '', startTime: '', endTime: '', workHours: '', status: 'ACTIVE' }
 }
+const saveRuleConfig = async () => {
+  await submit('/api/attendance-rules/config', {
+    ...ruleForm.value,
+    lateGraceMinutes: Number(ruleForm.value.lateGraceMinutes || 0),
+    earlyLeaveGraceMinutes: Number(ruleForm.value.earlyLeaveGraceMinutes || 0)
+  }, '考勤规则已保存')
+}
 const saveHoliday = async () => {
   await submit('/api/attendance-rules/holidays', { ...holidayForm.value }, '节假日已保存')
   holidayForm.value = { holidayDate: '', holidayName: '', holidayType: 'HOLIDAY' }
@@ -272,6 +299,12 @@ const submitOvertime = async () => {
 }
 const generateSummary = async () => {
   await submit('/api/attendance-rules/monthly-summary/generate', { cycleMonth: summaryForm.value.cycleMonth, empId: summaryForm.value.empId ? Number(summaryForm.value.empId) : null }, '月度汇总已生成')
+}
+const lockMonth = async () => {
+  await submit('/api/attendance-rules/month-lock', { cycleMonth: summaryForm.value.cycleMonth, remark: monthLockForm.value.remark || null }, '月份已锁定')
+}
+const unlockMonth = async () => {
+  await submit(`/api/attendance-rules/month-unlock/${summaryForm.value.cycleMonth}`, {}, '月份已解锁')
 }
 const submit = async (url, body, message) => {
   error.value = ''; info.value = ''

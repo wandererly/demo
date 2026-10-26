@@ -14,6 +14,7 @@ public class OvertimeRequest {
 	private String reason;
 	private String status;
 	private Long approverId;
+	private Long assigneeUserId;
 	private LocalDateTime approvedAt;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;

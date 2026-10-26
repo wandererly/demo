@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/approvals")
 @PreAuthorize("hasAuthority('approval:manage')")
+/** 统一审批入口，负责展示待办并转发不同业务类型的审批决定。 */
 public class ApprovalController {
 
 	private final ApprovalService approvalService;

@@ -174,6 +174,7 @@ const raw = ref({
   payslips: [],
   reviews: []
 })
+const dashboard = ref(null)
 const error = ref('')
 
 const rows = computed(() => [
@@ -230,6 +231,7 @@ const payrollMonthBars = computed(() => {
 onMounted(async () => {
   error.value = ''
   try {
+    dashboard.value = await http.get('/api/reports/dashboard').catch(() => null)
     const [departments, positions, employees, attendance, leaves, cycles, payrolls, payslips, approvals] = await Promise.all([
       http.get('/api/departments').catch(() => []),
       http.get('/api/org/positions').catch(() => []),
@@ -259,10 +261,20 @@ onMounted(async () => {
       pending: approvals.length,
       netSalaryTotal: payrollSource.reduce((sum, item) => sum + Number(item.netSalary || 0), 0)
     }
+    applyDashboardOverview()
   } catch (e) {
     error.value = e.message
   }
 })
+
+const applyDashboardOverview = () => {
+  if (!dashboard.value?.overview?.length) return
+  const map = new Map(dashboard.value.overview.map((item) => [item.name, Number(item.value || 0)]))
+  report.value.employees = map.get('员工') ?? report.value.employees
+  report.value.departments = map.get('部门') ?? report.value.departments
+  report.value.payrolls = map.get('工资条') ?? report.value.payrolls
+  report.value.pending = map.get('待审批') ?? report.value.pending
+}
 
 const countBy = (items, picker) => {
   const map = new Map()

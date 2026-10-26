@@ -1,14 +1,19 @@
 package com.hrm.service;
 
 import com.hrm.domain.AttendanceCorrection;
+import com.hrm.domain.AttendanceMonthLock;
 import com.hrm.domain.AttendanceMonthlySummary;
+import com.hrm.domain.AttendanceRuleConfig;
+import com.hrm.domain.DepartmentShiftBinding;
 import com.hrm.domain.EmployeeContract;
+import com.hrm.domain.EmployeeShiftBinding;
 import com.hrm.domain.Holiday;
 import com.hrm.domain.LeaveBalance;
 import com.hrm.domain.LifecycleEvent;
 import com.hrm.domain.NotificationItem;
 import com.hrm.domain.OvertimeRequest;
 import com.hrm.domain.Payslip;
+import com.hrm.domain.PayslipComponent;
 import com.hrm.domain.PerformanceGoal;
 import com.hrm.domain.SalaryChange;
 import com.hrm.domain.WorkShift;
@@ -36,6 +41,15 @@ public interface EnterpriseService {
 
 	List<WorkShift> listShifts();
 	WorkShift createShift(ShiftRequest request);
+	AttendanceRuleConfig getAttendanceRuleConfig();
+	AttendanceRuleConfig saveAttendanceRuleConfig(AttendanceRuleConfig config);
+	List<DepartmentShiftBinding> listDepartmentShiftBindings();
+	DepartmentShiftBinding saveDepartmentShiftBinding(DepartmentShiftBinding binding);
+	List<EmployeeShiftBinding> listEmployeeShiftBindings();
+	EmployeeShiftBinding saveEmployeeShiftBinding(EmployeeShiftBinding binding);
+	List<AttendanceMonthLock> listAttendanceMonthLocks();
+	AttendanceMonthLock lockAttendanceMonth(AttendanceMonthLock lock);
+	AttendanceMonthLock unlockAttendanceMonth(String cycleMonth);
 	List<Holiday> listHolidays();
 	Holiday saveHoliday(HolidayRequest request);
 	List<AttendanceCorrection> listCorrections();
@@ -60,6 +74,9 @@ public interface EnterpriseService {
 	List<Payslip> listPayslips();
 	List<Payslip> generatePayslips(PayslipGenerateRequest request);
 	void approvePayslip(Long id, Long approverId, String status);
+	List<PayslipComponent> listPayslipComponents(Long payslipId);
+	Payslip acknowledgePayslip(Long id);
+	String exportPayslip(Long id);
 	List<SalaryChange> listSalaryChanges();
 	SalaryChange submitSalaryChange(SalaryChangeRequest request);
 	void approveSalaryChange(Long id, Long approverId, String status);
@@ -67,5 +84,8 @@ public interface EnterpriseService {
 	List<NotificationItem> listNotifications();
 	void markNotificationRead(Long id);
 	List<Map<String, Object>> enterpriseOverview();
+	Map<String, Object> dashboardReport();
 	String exportCsv(String type);
+	Map<String, Object> importEmployeesCsv(String csv);
+	Map<String, Object> importAttendanceCsv(String csv);
 }

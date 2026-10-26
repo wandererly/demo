@@ -7,6 +7,8 @@ import com.hrm.domain.SysUserRole;
 import com.hrm.dto.RoleCreateRequest;
 import com.hrm.dto.RoleUpdateRequest;
 import com.hrm.dto.UserCreateRequest;
+import com.hrm.dto.EmployeePasswordResetRequest;
+import com.hrm.dto.PasswordResetRequest;
 import com.hrm.dto.UserRoleAssignRequest;
 import com.hrm.dto.UserUpdateRequest;
 import com.hrm.service.RbacService;
@@ -48,6 +50,16 @@ public class RbacController {
 	@PutMapping("/users/{id}")
 	public ApiResponse<SysUser> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
 		return ApiResponse.ok(rbacService.updateUser(id, request));
+	}
+
+	@PostMapping("/users/{id}/reset-password")
+	public ApiResponse<SysUser> resetPassword(@PathVariable Long id, @Valid @RequestBody PasswordResetRequest request) {
+		return ApiResponse.ok(rbacService.resetPassword(id, request));
+	}
+
+	@PostMapping("/users/reset-employee-password")
+	public ApiResponse<SysUser> resetEmployeePassword(@Valid @RequestBody EmployeePasswordResetRequest request) {
+		return ApiResponse.ok(rbacService.resetEmployeePassword(request));
 	}
 
 	@DeleteMapping("/users/{id}")

@@ -1,5 +1,7 @@
 package com.hrm.service;
 
+import com.hrm.common.constant.ErrorCode;
+import com.hrm.common.exception.BizException;
 import com.hrm.domain.Employee;
 import com.hrm.domain.SysUser;
 import com.hrm.mapper.EmployeeMapper;
@@ -73,6 +75,17 @@ public class EmployeeAccountService {
 			sysUserMapper.update(existing);
 		}
 		return existing;
+	}
+
+	public SysUser ensureEmployeeAccountByEmpNo(String empNo) {
+		if (empNo == null || empNo.isBlank()) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "请输入员工编号");
+		}
+		Employee employee = employeeMapper.findByEmpNo(empNo.trim());
+		if (employee == null) {
+			throw new BizException(ErrorCode.NOT_FOUND, "员工编号不存在");
+		}
+		return ensureEmployeeAccount(employee);
 	}
 
 	public void normalizeEmployeeNumber(Employee employee) {

@@ -17,10 +17,12 @@ import com.hrm.service.AuditLogService;
 import com.hrm.service.PayrollService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.YearMonth;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
+/** 负责薪酬试算和基础工资记录生成。 */
 public class PayrollServiceImpl implements PayrollService {
 
 	private final SalaryStructureMapper salaryStructureMapper;
@@ -43,6 +45,7 @@ public class PayrollServiceImpl implements PayrollService {
 
 	@Override
 	public PayrollCalcResult calculate(PayrollCalcRequest request) {
+		// 计算顺序为应发、扣款、计税收入、税额和实发工资，金额统一保留两位小数。
 		PayrollRule rule = payrollRuleMapper.findLatest();
 		double multiplier = rule == null ? 1.0 : rule.getOvertimeMultiplier();
 
@@ -128,6 +131,17 @@ public class PayrollServiceImpl implements PayrollService {
 
 	@Override
 	public PayrollRecord generate(PayrollGenerateRequest request) {
+		// 生成前按员工和月份查询，应用层校验配合数据库唯一索引防止重复工资记录。
+		final String cycleMonth;
+		try {
+			cycleMonth = YearMonth.parse(request.getCycleMonth()).toString();
+		} catch (Exception ex) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "薪酬月份必须为yyyy-MM格式");
+		}
+		PayrollRecord existing = payrollRecordMapper.findByEmpIdAndMonth(request.getEmpId(), cycleMonth);
+		if (existing != null) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "该员工当月工资记录已存在，不能重复生成");
+		}
 		SalaryStructure structure = salaryStructureMapper.findByEmpId(request.getEmpId());
 		if (structure == null) {
 			throw new BizException(ErrorCode.NOT_FOUND, "Salary structure not found");
@@ -147,7 +161,7 @@ public class PayrollServiceImpl implements PayrollService {
 		PayrollCalcResult calcResult = calculate(calcRequest);
 		PayrollRecord record = new PayrollRecord();
 		record.setEmpId(request.getEmpId());
-		record.setCycleMonth(request.getCycleMonth());
+		record.setCycleMonth(cycleMonth);
 		record.setGrossSalary(calcResult.getGrossSalary());
 		record.setNetSalary(calcResult.getNetSalary());
 		record.setTax(calcResult.getTax());

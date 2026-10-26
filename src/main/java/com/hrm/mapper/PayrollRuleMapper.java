@@ -13,6 +13,9 @@ public interface PayrollRuleMapper {
 	@Select("select id, overtime_multiplier, created_at from payroll_rule order by id desc limit 1")
 	PayrollRule findLatest();
 
+	@Select("select id, overtime_multiplier, created_at from payroll_rule where id = #{id}")
+	PayrollRule findById(Long id);
+
 	@Insert("insert into payroll_rule(overtime_multiplier, created_at) values(#{overtimeMultiplier}, now())")
 	@Options(useGeneratedKeys = true, keyProperty = "id")
 	int insert(PayrollRule rule);

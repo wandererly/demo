@@ -4,6 +4,7 @@ import com.hrm.common.api.ApiResponse;
 import com.hrm.common.constant.ErrorCode;
 import com.hrm.common.exception.BizException;
 import com.hrm.domain.AttendanceRecord;
+import com.hrm.domain.AttendanceRuleConfig;
 import com.hrm.domain.Department;
 import com.hrm.domain.Employee;
 import com.hrm.domain.LeaveRequest;
@@ -13,6 +14,7 @@ import com.hrm.domain.PerformanceGoal;
 import com.hrm.domain.SysUser;
 import com.hrm.dto.AttendanceCorrectionRequest;
 import com.hrm.dto.OvertimeRequestDto;
+import com.hrm.dto.LeaveCreateRequest;
 import com.hrm.mapper.AttendanceRecordMapper;
 import com.hrm.mapper.DepartmentMapper;
 import com.hrm.mapper.EmployeeMapper;
@@ -20,12 +22,19 @@ import com.hrm.mapper.EnterpriseMapper;
 import com.hrm.mapper.LeaveRequestMapper;
 import com.hrm.mapper.SysUserMapper;
 import com.hrm.service.EnterpriseService;
+import com.hrm.service.LeaveService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/self")
 @PreAuthorize("isAuthenticated()")
+/** 员工自助接口，所有员工编号均从当前登录账号取得，避免客户端越权传参。 */
 public class SelfServiceController {
 
 	private final SysUserMapper sysUserMapper;
@@ -47,6 +57,7 @@ public class SelfServiceController {
 	private final LeaveRequestMapper leaveRequestMapper;
 	private final EnterpriseMapper enterpriseMapper;
 	private final EnterpriseService enterpriseService;
+	private final LeaveService leaveService;
 
 	public SelfServiceController(SysUserMapper sysUserMapper,
 								 EmployeeMapper employeeMapper,
@@ -54,7 +65,8 @@ public class SelfServiceController {
 								 AttendanceRecordMapper attendanceRecordMapper,
 								 LeaveRequestMapper leaveRequestMapper,
 								 EnterpriseMapper enterpriseMapper,
-								 EnterpriseService enterpriseService) {
+								 EnterpriseService enterpriseService,
+								 LeaveService leaveService) {
 		this.sysUserMapper = sysUserMapper;
 		this.employeeMapper = employeeMapper;
 		this.departmentMapper = departmentMapper;
@@ -62,6 +74,7 @@ public class SelfServiceController {
 		this.leaveRequestMapper = leaveRequestMapper;
 		this.enterpriseMapper = enterpriseMapper;
 		this.enterpriseService = enterpriseService;
+		this.leaveService = leaveService;
 	}
 
 	@GetMapping("/profile")
@@ -81,20 +94,24 @@ public class SelfServiceController {
 
 	@PostMapping("/attendance/clock-in")
 	public ApiResponse<AttendanceRecord> clockIn() {
+		// 同一员工同一天只有一条考勤记录，重复上班打卡直接拒绝。
 		Long empId = currentEmpId();
 		AttendanceRecord record = todayRecord(empId, true);
 		if (record.getCheckIn() != null) {
 			throw new BizException(ErrorCode.BAD_REQUEST, "今天已经完成上班打卡");
 		}
 		LocalDateTime now = LocalDateTime.now();
+		AttendanceRuleConfig config = enterpriseService.getAttendanceRuleConfig();
 		record.setCheckIn(now);
-		record.setStatus(now.toLocalTime().isAfter(LocalTime.of(9, 0)) ? "LATE" : "NORMAL");
+		LocalTime startTime = parseTime(config.getWorkStartTime(), LocalTime.of(9, 0)).plusMinutes(config.getLateGraceMinutes() == null ? 0 : config.getLateGraceMinutes());
+		record.setStatus(now.toLocalTime().isAfter(startTime) ? "LATE" : "NORMAL");
 		attendanceRecordMapper.update(record);
 		return ApiResponse.ok(record);
 	}
 
 	@PostMapping("/attendance/clock-out")
 	public ApiResponse<AttendanceRecord> clockOut() {
+		// 下班打卡必须建立在已上班打卡且尚未签退的基础上。
 		Long empId = currentEmpId();
 		AttendanceRecord record = todayRecord(empId, true);
 		if (record.getCheckIn() == null) {
@@ -104,8 +121,10 @@ public class SelfServiceController {
 			throw new BizException(ErrorCode.BAD_REQUEST, "今天已经完成下班打卡");
 		}
 		LocalDateTime now = LocalDateTime.now();
+		AttendanceRuleConfig config = enterpriseService.getAttendanceRuleConfig();
 		record.setCheckOut(now);
-		if (!"LATE".equals(record.getStatus()) && now.toLocalTime().isBefore(LocalTime.of(18, 0))) {
+		LocalTime endTime = parseTime(config.getWorkEndTime(), LocalTime.of(18, 0)).minusMinutes(config.getEarlyLeaveGraceMinutes() == null ? 0 : config.getEarlyLeaveGraceMinutes());
+		if (!"LATE".equals(record.getStatus()) && now.toLocalTime().isBefore(endTime)) {
 			record.setStatus("EARLY_LEAVE");
 		} else if ("ABSENT".equals(record.getStatus()) || record.getStatus() == null || record.getStatus().isBlank()) {
 			record.setStatus("NORMAL");
@@ -126,6 +145,12 @@ public class SelfServiceController {
 		return ApiResponse.ok(enterpriseService.submitOvertime(request));
 	}
 
+	@PostMapping("/leave")
+	public ApiResponse<LeaveRequest> submitSelfLeave(@RequestBody LeaveCreateRequest request) {
+		request.setEmpId(currentEmpId());
+		return ApiResponse.ok(leaveService.create(request));
+	}
+
 	@GetMapping("/leave")
 	public ApiResponse<List<LeaveRequest>> leave() {
 		return ApiResponse.ok(leaveRequestMapper.findByEmpId(currentEmpId()));
@@ -139,6 +164,23 @@ public class SelfServiceController {
 	@GetMapping("/payslips")
 	public ApiResponse<List<Payslip>> payslips() {
 		return ApiResponse.ok(enterpriseMapper.listPayslipsByEmpId(currentEmpId()));
+	}
+
+	@PostMapping("/payslips/{id}/acknowledge")
+	public ApiResponse<Payslip> acknowledgePayslip(@PathVariable Long id) {
+		return ApiResponse.ok(enterpriseService.acknowledgePayslip(id));
+	}
+
+	@GetMapping("/payslips/{id}/export")
+	public ResponseEntity<byte[]> exportPayslip(@PathVariable Long id) {
+		byte[] body = enterpriseService.exportPayslip(id).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+		ContentDisposition disposition = ContentDisposition.attachment()
+				.filename("payslip-" + id + ".csv", java.nio.charset.StandardCharsets.UTF_8)
+				.build();
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+				.contentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
+				.body(body);
 	}
 
 	@GetMapping("/notifications")
@@ -179,6 +221,7 @@ public class SelfServiceController {
 	}
 
 	private AttendanceRecord todayRecord(Long empId, boolean createIfMissing) {
+		// 首次操作当天考勤时创建 ABSENT 基线，后续打卡只更新这条记录。
 		AttendanceRecord record = attendanceRecordMapper.findByEmpIdAndWorkDate(empId, LocalDate.now());
 		if (record != null || !createIfMissing) {
 			return record;
@@ -189,6 +232,14 @@ public class SelfServiceController {
 		record.setStatus("ABSENT");
 		attendanceRecordMapper.insert(record);
 		return record;
+	}
+
+	private LocalTime parseTime(String value, LocalTime fallback) {
+		try {
+			return value == null || value.isBlank() ? fallback : LocalTime.parse(value);
+		} catch (Exception ex) {
+			return fallback;
+		}
 	}
 
 	private Long currentEmpId() {

@@ -30,7 +30,7 @@
     <section class="card">
       <h3>绩效指标</h3>
       <div class="form-grid">
-        <select class="input" v-model="indicatorForm.cycleId">
+        <select class="input" v-model="indicatorForm.cycleId" @change="loadIndicators">
           <option value="">请选择周期</option>
           <option v-for="cycle in cycles" :key="cycle.id" :value="cycle.id">{{ cycle.name }}</option>
         </select>
@@ -64,7 +64,7 @@
           <option value="">请选择员工</option>
           <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ employeeLabel(emp) }}</option>
         </select>
-        <select class="input" v-model="reviewForm.cycleId">
+        <select class="input" v-model="reviewForm.cycleId" @change="loadReviews">
           <option value="">请选择周期</option>
           <option v-for="cycle in cycles" :key="cycle.id" :value="cycle.id">{{ cycle.name }}</option>
         </select>
@@ -477,5 +477,6 @@ const statusText = (status) => ({
 
 onMounted(async () => {
   await Promise.all([loadCycles(), loadEmployees()])
+  await Promise.all([loadIndicators(), loadReviews()])
 })
 </script>

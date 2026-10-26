@@ -3,10 +3,14 @@ package com.hrm.service.impl;
 import com.hrm.common.constant.ErrorCode;
 import com.hrm.common.exception.BizException;
 import com.hrm.domain.AttendanceCorrection;
+import com.hrm.domain.AttendanceMonthLock;
 import com.hrm.domain.AttendanceMonthlySummary;
 import com.hrm.domain.AttendanceRecord;
+import com.hrm.domain.AttendanceRuleConfig;
+import com.hrm.domain.DepartmentShiftBinding;
 import com.hrm.domain.Employee;
 import com.hrm.domain.EmployeeContract;
+import com.hrm.domain.EmployeeShiftBinding;
 import com.hrm.domain.Holiday;
 import com.hrm.domain.LeaveBalance;
 import com.hrm.domain.LeaveRequest;
@@ -14,6 +18,7 @@ import com.hrm.domain.LifecycleEvent;
 import com.hrm.domain.NotificationItem;
 import com.hrm.domain.OvertimeRequest;
 import com.hrm.domain.Payslip;
+import com.hrm.domain.PayslipComponent;
 import com.hrm.domain.PerformanceGoal;
 import com.hrm.domain.SalaryStructure;
 import com.hrm.domain.SalaryChange;
@@ -36,18 +41,22 @@ import com.hrm.mapper.EnterpriseMapper;
 import com.hrm.mapper.LeaveRequestMapper;
 import com.hrm.mapper.SalaryStructureMapper;
 import com.hrm.service.AuditLogService;
+import com.hrm.service.CurrentUserService;
 import com.hrm.service.EnterpriseService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+/** 企业人事扩展业务：考勤、审批联动、假期余额、薪酬和通知。 */
 public class EnterpriseServiceImpl implements EnterpriseService {
 
 	private static final BigDecimal ZERO = BigDecimal.ZERO.setScale(2);
@@ -58,24 +67,33 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	private final LeaveRequestMapper leaveRequestMapper;
 	private final SalaryStructureMapper salaryStructureMapper;
 	private final AuditLogService auditLogService;
+	private final CurrentUserService currentUserService;
 
 	public EnterpriseServiceImpl(EnterpriseMapper enterpriseMapper,
 								 EmployeeMapper employeeMapper,
 								 AttendanceRecordMapper attendanceRecordMapper,
 								 LeaveRequestMapper leaveRequestMapper,
 								 SalaryStructureMapper salaryStructureMapper,
-								 AuditLogService auditLogService) {
+								 AuditLogService auditLogService,
+								 CurrentUserService currentUserService) {
 		this.enterpriseMapper = enterpriseMapper;
 		this.employeeMapper = employeeMapper;
 		this.attendanceRecordMapper = attendanceRecordMapper;
 		this.leaveRequestMapper = leaveRequestMapper;
 		this.salaryStructureMapper = salaryStructureMapper;
 		this.auditLogService = auditLogService;
+		this.currentUserService = currentUserService;
 	}
 
 	@Override
 	public List<EmployeeContract> listContracts() {
-		return enterpriseMapper.listContracts();
+		List<EmployeeContract> rows = new ArrayList<>();
+		for (EmployeeContract contract : enterpriseMapper.listContracts()) {
+			if (currentUserService.canAccessEmployeeRecord(contract.getEmpId())) {
+				rows.add(contract);
+			}
+		}
+		return rows;
 	}
 
 	@Override
@@ -88,7 +106,15 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		contract.setStartDate(request.getStartDate());
 		contract.setEndDate(request.getEndDate());
 		contract.setStatus(blankToDefault(request.getStatus(), "ACTIVE"));
+		contract.setProbationStartDate(request.getProbationStartDate());
+		contract.setProbationEndDate(request.getProbationEndDate());
+		contract.setRenewalStatus("PENDING");
+		contract.setReminderSent(false);
 		enterpriseMapper.insertContract(contract);
+		employee.setProbationStartDate(request.getProbationStartDate());
+		employee.setProbationEndDate(request.getProbationEndDate());
+		employee.setRegularizationDueDate(request.getProbationEndDate());
+		employeeMapper.update(employee);
 		LifecycleEvent event = new LifecycleEvent();
 		event.setEmpId(employee.getId());
 		event.setEventType("CONTRACT");
@@ -105,7 +131,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public List<LifecycleEvent> listLifecycleEvents() {
-		return enterpriseMapper.listLifecycleEvents();
+		List<LifecycleEvent> rows = new ArrayList<>();
+		for (LifecycleEvent event : enterpriseMapper.listLifecycleEvents()) {
+			if (currentUserService.canAccessEmployeeRecord(event.getEmpId())) {
+				rows.add(event);
+			}
+		}
+		return rows;
 	}
 
 	@Override
@@ -123,6 +155,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		event.setToPosition(request.getToPosition());
 		event.setEffectiveDate(request.getEffectiveDate());
 		event.setStatus("PENDING");
+		event.setAssigneeUserId(assigneeForLifecycle(employee, type));
+		event.setTargetSalary(request.getTargetSalary());
+		event.setAccountAction("RESIGNATION".equals(type) ? "LOCK" : "KEEP");
+		event.setAssetHandoverStatus("RESIGNATION".equals(type) ? "PENDING" : "NOT_REQUIRED");
 		event.setDetail(request.getDetail());
 		enterpriseMapper.insertLifecycleEvent(event);
 
@@ -177,6 +213,125 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	}
 
 	@Override
+	public AttendanceRuleConfig getAttendanceRuleConfig() {
+		AttendanceRuleConfig config = enterpriseMapper.findAttendanceRuleConfig();
+		if (config != null) {
+			return config;
+		}
+		AttendanceRuleConfig fallback = new AttendanceRuleConfig();
+		fallback.setWorkStartTime("09:00");
+		fallback.setWorkEndTime("18:00");
+		fallback.setLateGraceMinutes(0);
+		fallback.setEarlyLeaveGraceMinutes(0);
+		fallback.setAbsenceRule("NO_CHECK_IN");
+		fallback.setGenerateBaselineOnHoliday(false);
+		fallback.setGenerateBaselineOnWorkday(true);
+		return fallback;
+	}
+
+	@Override
+	public AttendanceRuleConfig saveAttendanceRuleConfig(AttendanceRuleConfig config) {
+		if (config == null) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "考勤规则不能为空");
+		}
+		config.setWorkStartTime(blankToDefault(config.getWorkStartTime(), "09:00"));
+		config.setWorkEndTime(blankToDefault(config.getWorkEndTime(), "18:00"));
+		config.setLateGraceMinutes(config.getLateGraceMinutes() == null ? 0 : config.getLateGraceMinutes());
+		config.setEarlyLeaveGraceMinutes(config.getEarlyLeaveGraceMinutes() == null ? 0 : config.getEarlyLeaveGraceMinutes());
+		try {
+			LocalTime start = LocalTime.parse(config.getWorkStartTime());
+			LocalTime end = LocalTime.parse(config.getWorkEndTime());
+			if (!end.isAfter(start)) {
+				throw new BizException(ErrorCode.BAD_REQUEST, "下班时间必须晚于上班时间");
+			}
+		} catch (java.time.format.DateTimeParseException ex) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "上下班时间格式必须为HH:mm");
+		}
+		if (config.getLateGraceMinutes() < 0 || config.getEarlyLeaveGraceMinutes() < 0
+				|| config.getLateGraceMinutes() > 180 || config.getEarlyLeaveGraceMinutes() > 180) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "宽限时间必须在0到180分钟之间");
+		}
+		LocalTime effectiveStart = LocalTime.parse(config.getWorkStartTime()).plusMinutes(config.getLateGraceMinutes());
+		LocalTime effectiveEnd = LocalTime.parse(config.getWorkEndTime()).minusMinutes(config.getEarlyLeaveGraceMinutes());
+		if (!effectiveEnd.isAfter(effectiveStart)) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "迟到和早退宽限时间不能覆盖整个工作时段");
+		}
+		config.setAbsenceRule(blankToDefault(config.getAbsenceRule(), "NO_CHECK_IN"));
+		config.setGenerateBaselineOnHoliday(config.getGenerateBaselineOnHoliday() != null && config.getGenerateBaselineOnHoliday());
+		config.setGenerateBaselineOnWorkday(config.getGenerateBaselineOnWorkday() == null || config.getGenerateBaselineOnWorkday());
+		if (config.getId() == null) {
+			enterpriseMapper.insertAttendanceRuleConfig(config);
+		} else {
+			enterpriseMapper.updateAttendanceRuleConfig(config);
+		}
+		auditLogService.record("考勤规则", "保存配置", "attendance_rule_config", config.getId(), config.getWorkStartTime() + "-" + config.getWorkEndTime());
+		return getAttendanceRuleConfig();
+	}
+
+	@Override
+	public List<DepartmentShiftBinding> listDepartmentShiftBindings() {
+		return enterpriseMapper.listDepartmentShiftBindings();
+	}
+
+	@Override
+	public DepartmentShiftBinding saveDepartmentShiftBinding(DepartmentShiftBinding binding) {
+		if (binding.getDeptId() == null || binding.getShiftId() == null) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "请选择部门和班次");
+		}
+		binding.setStatus(blankToDefault(binding.getStatus(), "ACTIVE"));
+		enterpriseMapper.upsertDepartmentShiftBinding(binding);
+		auditLogService.record("考勤规则", "绑定部门班次", "department_shift_binding", binding.getId(), String.valueOf(binding.getDeptId()));
+		return enterpriseMapper.findDepartmentShiftBinding(binding.getDeptId());
+	}
+
+	@Override
+	public List<EmployeeShiftBinding> listEmployeeShiftBindings() {
+		return enterpriseMapper.listEmployeeShiftBindings();
+	}
+
+	@Override
+	public EmployeeShiftBinding saveEmployeeShiftBinding(EmployeeShiftBinding binding) {
+		if (binding.getEmpId() == null || binding.getShiftId() == null) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "请选择员工和班次");
+		}
+		currentUserService.requireAccessibleEmployee(binding.getEmpId());
+		binding.setStatus(blankToDefault(binding.getStatus(), "ACTIVE"));
+		enterpriseMapper.upsertEmployeeShiftBinding(binding);
+		auditLogService.record("考勤规则", "绑定员工班次", "employee_shift_binding", binding.getId(), String.valueOf(binding.getEmpId()));
+		return enterpriseMapper.findEmployeeShiftBinding(binding.getEmpId());
+	}
+
+	@Override
+	public List<AttendanceMonthLock> listAttendanceMonthLocks() {
+		return enterpriseMapper.listAttendanceMonthLocks();
+	}
+
+	@Override
+	public AttendanceMonthLock lockAttendanceMonth(AttendanceMonthLock lock) {
+		parseMonth(lock.getCycleMonth());
+		lock.setStatus("LOCKED");
+		lock.setLockedBy(currentUserService.requireCurrentUser().getId());
+		enterpriseMapper.upsertAttendanceMonthLock(lock);
+		auditLogService.record("考勤", "锁定月份", "attendance_month_lock", lock.getId(), lock.getCycleMonth());
+		return enterpriseMapper.findAttendanceMonthLock(lock.getCycleMonth());
+	}
+
+	@Override
+	public AttendanceMonthLock unlockAttendanceMonth(String cycleMonth) {
+		parseMonth(cycleMonth);
+		AttendanceMonthLock lock = enterpriseMapper.findAttendanceMonthLock(cycleMonth);
+		if (lock == null) {
+			lock = new AttendanceMonthLock();
+			lock.setCycleMonth(cycleMonth);
+		}
+		lock.setStatus("OPEN");
+		lock.setLockedBy(currentUserService.requireCurrentUser().getId());
+		enterpriseMapper.upsertAttendanceMonthLock(lock);
+		auditLogService.record("考勤", "解锁月份", "attendance_month_lock", lock.getId(), cycleMonth);
+		return enterpriseMapper.findAttendanceMonthLock(cycleMonth);
+	}
+
+	@Override
 	public List<Holiday> listHolidays() {
 		return enterpriseMapper.listHolidays();
 	}
@@ -194,7 +349,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public List<AttendanceCorrection> listCorrections() {
-		return enterpriseMapper.listCorrections();
+		List<AttendanceCorrection> rows = new ArrayList<>();
+		for (AttendanceCorrection correction : enterpriseMapper.listCorrections()) {
+			if (currentUserService.canAccessEmployeeRecord(correction.getEmpId())) {
+				rows.add(correction);
+			}
+		}
+		return rows;
 	}
 
 	@Override
@@ -207,6 +368,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		correction.setCheckOut(request.getCheckOut());
 		correction.setReason(request.getReason());
 		correction.setStatus("PENDING");
+		correction.setAssigneeUserId(currentUserService.assigneeForEmployee(request.getEmpId()));
 		enterpriseMapper.insertCorrection(correction);
 		notifyEmployee(request.getEmpId(), "补卡审批待办", request.getWorkDate() + " 补卡已提交");
 		auditLogService.record("考勤", "提交补卡", "attendance_correction", correction.getId(), request.getWorkDate().toString());
@@ -216,6 +378,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	@Override
 	@Transactional
 	public void approveCorrection(Long id, Long approverId, String status) {
+		// 补卡审批通过后写回考勤记录；月份锁定时禁止修改历史数据。
 		AttendanceCorrection correction = enterpriseMapper.findCorrection(id);
 		if (correction == null) {
 			throw new BizException(ErrorCode.NOT_FOUND, "补卡申请不存在");
@@ -228,6 +391,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		correction.setApproverId(approverId);
 		enterpriseMapper.updateCorrectionStatus(correction);
 		if ("APPROVED".equals(decision)) {
+			requireMonthUnlocked(YearMonth.from(correction.getWorkDate()).toString());
 			applyAttendanceCorrection(correction);
 		}
 		notifyEmployee(correction.getEmpId(), "补卡审批结果", correction.getWorkDate() + "：" + correction.getStatus());
@@ -236,7 +400,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public List<OvertimeRequest> listOvertimeRequests() {
-		return enterpriseMapper.listOvertimeRequests();
+		List<OvertimeRequest> rows = new ArrayList<>();
+		for (OvertimeRequest request : enterpriseMapper.listOvertimeRequests()) {
+			if (currentUserService.canAccessEmployeeRecord(request.getEmpId())) {
+				rows.add(request);
+			}
+		}
+		return rows;
 	}
 
 	@Override
@@ -251,6 +421,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		overtime.setHours(nz(request.getHours()));
 		overtime.setReason(request.getReason());
 		overtime.setStatus("PENDING");
+		overtime.setAssigneeUserId(currentUserService.assigneeForEmployee(request.getEmpId()));
 		enterpriseMapper.insertOvertimeRequest(overtime);
 		notifyEmployee(request.getEmpId(), "加班审批待办", request.getWorkDate() + " 加班 " + overtime.getHours() + " 小时");
 		auditLogService.record("考勤", "提交加班", "overtime_request", overtime.getId(), overtime.getHours().toPlainString());
@@ -260,6 +431,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	@Override
 	@Transactional
 	public void approveOvertime(Long id, Long approverId, String status) {
+		// 加班审批通过后重新生成对应月份汇总，保证薪酬读取最新考勤结果。
 		OvertimeRequest overtime = enterpriseMapper.findOvertimeRequest(id);
 		if (overtime == null) {
 			throw new BizException(ErrorCode.NOT_FOUND, "加班申请不存在");
@@ -283,16 +455,26 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public List<AttendanceMonthlySummary> listMonthlySummaries() {
-		return enterpriseMapper.listMonthlySummaries();
+		List<AttendanceMonthlySummary> rows = new ArrayList<>();
+		for (AttendanceMonthlySummary summary : enterpriseMapper.listMonthlySummaries()) {
+			if (currentUserService.canAccessEmployeeRecord(summary.getEmpId())) {
+				rows.add(summary);
+			}
+		}
+		return rows;
 	}
 
 	@Override
 	public List<AttendanceMonthlySummary> generateMonthlySummary(AttendanceSummaryRequest request) {
 		YearMonth month = parseMonth(request.getCycleMonth());
+		requireMonthUnlocked(month.toString());
 		List<Employee> employees = employeeMapper.findAll();
 		List<AttendanceMonthlySummary> result = new ArrayList<>();
 		for (Employee employee : employees) {
 			if (request.getEmpId() != null && !request.getEmpId().equals(employee.getId())) {
+				continue;
+			}
+			if (!currentUserService.canAccessEmployeeRecord(employee.getId())) {
 				continue;
 			}
 			AttendanceMonthlySummary summary = buildMonthlySummary(employee, month);
@@ -305,7 +487,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public List<LeaveBalance> listLeaveBalances() {
-		return enterpriseMapper.listLeaveBalances();
+		List<LeaveBalance> rows = new ArrayList<>();
+		for (LeaveBalance balance : enterpriseMapper.listLeaveBalances()) {
+			if (currentUserService.canAccessEmployeeRecord(balance.getEmpId())) {
+				rows.add(balance);
+			}
+		}
+		return rows;
 	}
 
 	@Override
@@ -328,6 +516,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	@Override
 	@Transactional
 	public void applyLeaveBalance(Long leaveRequestId) {
+		// 通过业务引用检查扣减日志，保证同一请假单只扣减一次余额。
 		LeaveRequest leave = leaveRequestMapper.findById(leaveRequestId);
 		if (leave == null || !"APPROVED".equals(leave.getStatus())) {
 			return;
@@ -355,7 +544,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public List<PerformanceGoal> listPerformanceGoals() {
-		return enterpriseMapper.listPerformanceGoals();
+		List<PerformanceGoal> rows = new ArrayList<>();
+		for (PerformanceGoal goal : enterpriseMapper.listPerformanceGoals()) {
+			if (currentUserService.canAccessEmployeeRecord(goal.getEmpId())) {
+				rows.add(goal);
+			}
+		}
+		return rows;
 	}
 
 	@Override
@@ -408,27 +603,44 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public List<Payslip> listPayslips() {
-		return enterpriseMapper.listPayslips();
+		List<Payslip> rows = new ArrayList<>();
+		for (Payslip payslip : enterpriseMapper.listPayslips()) {
+			if (currentUserService.canAccessEmployeeRecord(payslip.getEmpId())) {
+				rows.add(payslip);
+			}
+		}
+		return rows;
 	}
 
 	@Override
 	@Transactional
 	public List<Payslip> generatePayslips(PayslipGenerateRequest request) {
+		// 工资条按员工和月份唯一生成，并同步重建可追溯的工资条明细。
 		YearMonth month = parseMonth(request.getCycleMonth());
+		requireMonthUnlocked(month.toString());
 		List<Employee> employees = employeeMapper.findAll();
 		List<Payslip> result = new ArrayList<>();
 		for (Employee employee : employees) {
 			if (request.getEmpId() != null && !request.getEmpId().equals(employee.getId())) {
 				continue;
 			}
+			if (!currentUserService.canAccessEmployeeRecord(employee.getId())) {
+				continue;
+			}
 			Payslip existing = enterpriseMapper.findPayslipByEmpAndMonth(employee.getId(), month.toString());
-			if (existing != null && "APPROVED".equals(existing.getStatus())) {
+			if (existing != null && isLockedPayslip(existing.getStatus())) {
 				result.add(existing);
 				continue;
 			}
 			Payslip payslip = buildPayslip(employee, month);
+			payslip.setAssigneeUserId(currentUserService.assigneeForManagerWorkflow());
 			enterpriseMapper.upsertPayslip(payslip);
-			result.add(payslip);
+			Payslip saved = enterpriseMapper.findPayslipByEmpAndMonth(employee.getId(), month.toString());
+			if (saved != null) {
+				replacePayslipComponents(saved);
+				notifyEmployee(saved.getEmpId(), "工资条生成通知", saved.getCycleMonth() + " 工资条已生成", "PAYSLIP", saved.getId());
+			}
+			result.add(saved == null ? payslip : saved);
 		}
 		auditLogService.record("薪酬", "生成工资条", "payslip", null, request.getCycleMonth());
 		return result;
@@ -437,12 +649,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	@Override
 	@Transactional
 	public void approvePayslip(Long id, Long approverId, String status) {
+		// 工资条进入最终状态后保持锁定，重复审批不再改变金额和状态。
 		Payslip payslip = enterpriseMapper.findPayslip(id);
 		if (payslip == null) {
 			throw new BizException(ErrorCode.NOT_FOUND, "工资条不存在");
 		}
 		String decision = normalizeDecision(status);
-		if (isFinalStatus(payslip.getStatus())) {
+		if (isLockedPayslip(payslip.getStatus())) {
 			return;
 		}
 		String before = payslip.getStatus();
@@ -454,8 +667,61 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	}
 
 	@Override
+	public List<PayslipComponent> listPayslipComponents(Long payslipId) {
+		Payslip payslip = enterpriseMapper.findPayslip(payslipId);
+		if (payslip == null) {
+			throw new BizException(ErrorCode.NOT_FOUND, "工资条不存在");
+		}
+		if (!currentUserService.canAccessEmployeeRecord(payslip.getEmpId())) {
+			throw new BizException(ErrorCode.FORBIDDEN, "无权访问该工资条");
+		}
+		return enterpriseMapper.listPayslipComponents(payslipId);
+	}
+
+	@Override
+	public Payslip acknowledgePayslip(Long id) {
+		Payslip payslip = enterpriseMapper.findPayslip(id);
+		if (payslip == null) {
+			throw new BizException(ErrorCode.NOT_FOUND, "工资条不存在");
+		}
+		if (!currentUserService.canAccessEmployee(payslip.getEmpId())) {
+			throw new BizException(ErrorCode.FORBIDDEN, "无权签收该工资条");
+		}
+		if (!"APPROVED".equalsIgnoreCase(payslip.getStatus()) && !"PAID".equalsIgnoreCase(payslip.getStatus())) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "只有已审批或已发放工资条可以签收");
+		}
+		payslip.setStatus("ACKNOWLEDGED");
+		enterpriseMapper.acknowledgePayslip(payslip);
+		notifyEmployee(payslip.getEmpId(), "工资条签收", payslip.getCycleMonth() + " 工资条已签收", "PAYSLIP_ACK", payslip.getId());
+		return enterpriseMapper.findPayslip(id);
+	}
+
+	@Override
+	public String exportPayslip(Long id) {
+		Payslip payslip = enterpriseMapper.findPayslip(id);
+		if (payslip == null) {
+			throw new BizException(ErrorCode.NOT_FOUND, "工资条不存在");
+		}
+		if (!currentUserService.canAccessEmployeeRecord(payslip.getEmpId())) {
+			throw new BizException(ErrorCode.FORBIDDEN, "无权导出该工资条");
+		}
+		StringBuilder csv = new StringBuilder("项目,金额,来源,备注\n");
+		for (PayslipComponent component : enterpriseMapper.listPayslipComponents(id)) {
+			csv.append(row(component.getComponentType(), component.getAmount(), component.getSourceType(), component.getRemark()));
+		}
+		csv.append(row("实发工资", payslip.getNetSalary(), "PAYSLIP", payslip.getCycleMonth()));
+		return csv.toString();
+	}
+
+	@Override
 	public List<SalaryChange> listSalaryChanges() {
-		return enterpriseMapper.listSalaryChanges();
+		List<SalaryChange> rows = new ArrayList<>();
+		for (SalaryChange change : enterpriseMapper.listSalaryChanges()) {
+			if (currentUserService.canAccessEmployeeRecord(change.getEmpId())) {
+				rows.add(change);
+			}
+		}
+		return rows;
 	}
 
 	@Override
@@ -468,6 +734,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		change.setEffectiveMonth(request.getEffectiveMonth());
 		change.setReason(request.getReason());
 		change.setStatus("PENDING");
+		change.setAssigneeUserId(currentUserService.assigneeForManagerWorkflow());
 		enterpriseMapper.insertSalaryChange(change);
 		notifyEmployee(employee.getId(), "调薪审批待办", request.getEffectiveMonth() + " 调薪已提交");
 		auditLogService.record("薪酬", "提交调薪", "salary_change", change.getId(), employee.getName());
@@ -502,7 +769,11 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public List<NotificationItem> listNotifications() {
-		return enterpriseMapper.listNotifications();
+		if (currentUserService.canManageAllPeople() || currentUserService.hasPermission("approval:manage")) {
+			return enterpriseMapper.listNotifications();
+		}
+		return enterpriseMapper.listNotificationsForUser(currentUserService.currentEmpIdOrNull(),
+				currentUserService.requireCurrentUser().getUsername());
 	}
 
 	@Override
@@ -513,6 +784,19 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	@Override
 	public List<Map<String, Object>> enterpriseOverview() {
 		return enterpriseMapper.enterpriseOverview();
+	}
+
+	@Override
+	public Map<String, Object> dashboardReport() {
+		Map<String, Object> report = new LinkedHashMap<>();
+		report.put("overview", enterpriseMapper.enterpriseOverview());
+		report.put("attendanceTrend", attendanceTrend());
+		report.put("leaveTrend", leaveTrend());
+		report.put("departmentHeadcount", departmentHeadcount());
+		report.put("performanceDistribution", performanceDistribution());
+		report.put("payrollCost", payrollCost());
+		report.put("approvalEfficiency", approvalEfficiency());
+		return report;
 	}
 
 	@Override
@@ -536,6 +820,80 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		throw new BizException(ErrorCode.BAD_REQUEST, "不支持的导出类型");
 	}
 
+	@Override
+	public Map<String, Object> importEmployeesCsv(String csv) {
+		Map<String, Object> result = new LinkedHashMap<>();
+		List<String> errors = new ArrayList<>();
+		int success = 0;
+		String[] lines = csv == null ? new String[0] : csv.split("\\R");
+		for (int i = 1; i < lines.length; i++) {
+			if (lines[i].isBlank()) {
+				continue;
+			}
+			String[] parts = lines[i].split(",", -1);
+			try {
+				if (parts.length < 5) {
+					throw new IllegalArgumentException("字段不足");
+				}
+				Employee employee = new Employee();
+				employee.setName(unquote(parts[0]));
+				employee.setGender(unquote(parts[1]));
+				employee.setPhone(unquote(parts[2]));
+				employee.setEmail(unquote(parts[3]));
+				employee.setDeptId(Long.valueOf(unquote(parts[4])));
+				employee.setPosition(parts.length > 5 ? unquote(parts[5]) : null);
+				employee.setStatus("ACTIVE");
+				employee.setBaseSalary(parts.length > 6 && !unquote(parts[6]).isBlank() ? new BigDecimal(unquote(parts[6])) : BigDecimal.valueOf(3500));
+				employeeMapper.insert(employee);
+				success++;
+			} catch (Exception ex) {
+				errors.add("第" + (i + 1) + "行：" + ex.getMessage());
+			}
+		}
+		result.put("successCount", success);
+		result.put("failureCount", errors.size());
+		result.put("errors", errors);
+		return result;
+	}
+
+	@Override
+	public Map<String, Object> importAttendanceCsv(String csv) {
+		Map<String, Object> result = new LinkedHashMap<>();
+		List<String> errors = new ArrayList<>();
+		int success = 0;
+		String[] lines = csv == null ? new String[0] : csv.split("\\R");
+		for (int i = 1; i < lines.length; i++) {
+			if (lines[i].isBlank()) {
+				continue;
+			}
+			String[] parts = lines[i].split(",", -1);
+			try {
+				if (parts.length < 3) {
+					throw new IllegalArgumentException("字段不足");
+				}
+				AttendanceRecord record = new AttendanceRecord();
+				record.setEmpId(Long.valueOf(unquote(parts[0])));
+				record.setWorkDate(LocalDate.parse(unquote(parts[1])));
+				requireMonthUnlocked(YearMonth.from(record.getWorkDate()).toString());
+				record.setStatus(unquote(parts[2]));
+				if (parts.length > 3 && !unquote(parts[3]).isBlank()) {
+					record.setCheckIn(java.time.LocalDateTime.parse(unquote(parts[3])));
+				}
+				if (parts.length > 4 && !unquote(parts[4]).isBlank()) {
+					record.setCheckOut(java.time.LocalDateTime.parse(unquote(parts[4])));
+				}
+				attendanceRecordMapper.insert(record);
+				success++;
+			} catch (Exception ex) {
+				errors.add("第" + (i + 1) + "行：" + ex.getMessage());
+			}
+		}
+		result.put("successCount", success);
+		result.put("failureCount", errors.size());
+		result.put("errors", errors);
+		return result;
+	}
+
 	private void applyLifecycle(Employee employee, LifecycleEvent event) {
 		if ("REGULARIZATION".equals(event.getEventType())) {
 			employee.setStatus("ACTIVE");
@@ -547,10 +905,187 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 				employee.setPosition(event.getToPosition());
 			}
 			employee.setStatus("ACTIVE");
+			if (event.getTargetSalary() != null) {
+				applyTransferSalaryChange(employee, event);
+			}
 		} else if ("RESIGNATION".equals(event.getEventType())) {
 			employee.setStatus("RESIGNED");
+			employee.setResignedAt(event.getEffectiveDate() == null ? LocalDate.now() : event.getEffectiveDate());
+			employee.setAccountLocked(true);
 		}
 		employeeMapper.update(employee);
+	}
+
+	private Long assigneeForLifecycle(Employee employee, String type) {
+		if ("REGULARIZATION".equals(type)) {
+			return currentUserService.assigneeForEmployee(employee.getId());
+		}
+		return currentUserService.assigneeForManagerWorkflow();
+	}
+
+	private void applyTransferSalaryChange(Employee employee, LifecycleEvent event) {
+		SalaryChange change = new SalaryChange();
+		change.setEmpId(employee.getId());
+		change.setBeforeSalary(nz(employee.getBaseSalary()));
+		change.setAfterSalary(nz(event.getTargetSalary()));
+		change.setEffectiveMonth(YearMonth.from(event.getEffectiveDate() == null ? LocalDate.now() : event.getEffectiveDate()).toString());
+		change.setReason("调岗同步调薪");
+		change.setStatus("APPROVED");
+		change.setApproverId(event.getApproverId());
+		change.setAssigneeUserId(event.getAssigneeUserId());
+		enterpriseMapper.insertSalaryChange(change);
+		employee.setBaseSalary(change.getAfterSalary());
+		enterpriseMapper.updateSalaryStructureBase(employee.getId(), change.getAfterSalary());
+	}
+
+	private List<Map<String, Object>> attendanceTrend() {
+		Map<String, Integer> buckets = new LinkedHashMap<>();
+		for (AttendanceRecord record : attendanceRecordMapper.findAll()) {
+			if (record.getWorkDate() == null || !currentUserService.canAccessEmployeeRecord(record.getEmpId())) {
+				continue;
+			}
+			String key = record.getWorkDate().toString();
+			String status = record.getStatus() == null ? "" : record.getStatus().toUpperCase();
+			if (status.contains("LATE") || status.contains("EARLY") || status.contains("ABSENT") || "迟到".equals(record.getStatus())
+					|| "早退".equals(record.getStatus()) || "缺勤".equals(record.getStatus())) {
+				buckets.put(key, buckets.getOrDefault(key, 0) + 1);
+			}
+		}
+		return mapEntries(buckets, "date", "count");
+	}
+
+	private List<Map<String, Object>> leaveTrend() {
+		Map<String, Integer> buckets = new LinkedHashMap<>();
+		for (LeaveRequest leave : leaveRequestMapper.findAll()) {
+			if (leave.getStartTime() == null || !currentUserService.canAccessEmployeeRecord(leave.getEmpId())) {
+				continue;
+			}
+			String key = YearMonth.from(leave.getStartTime()).toString();
+			buckets.put(key, buckets.getOrDefault(key, 0) + 1);
+		}
+		return mapEntries(buckets, "month", "count");
+	}
+
+	private List<Map<String, Object>> departmentHeadcount() {
+		Map<String, Integer> buckets = new LinkedHashMap<>();
+		for (Employee employee : employeeMapper.findAll()) {
+			if (!currentUserService.canAccessEmployeeRecord(employee.getId())) {
+				continue;
+			}
+			String key = employee.getDeptId() == null ? "未分配" : String.valueOf(employee.getDeptId());
+			buckets.put(key, buckets.getOrDefault(key, 0) + 1);
+		}
+		return mapEntries(buckets, "department", "count");
+	}
+
+	private List<Map<String, Object>> performanceDistribution() {
+		Map<String, Integer> buckets = new LinkedHashMap<>();
+		for (PerformanceGoal goal : enterpriseMapper.listPerformanceGoals()) {
+			if (!currentUserService.canAccessEmployeeRecord(goal.getEmpId())) {
+				continue;
+			}
+			String key = blankToDefault(goal.getFinalLevel(), "未定级");
+			buckets.put(key, buckets.getOrDefault(key, 0) + 1);
+		}
+		return mapEntries(buckets, "level", "count");
+	}
+
+	private List<Map<String, Object>> payrollCost() {
+		Map<String, BigDecimal> buckets = new LinkedHashMap<>();
+		for (Payslip payslip : enterpriseMapper.listPayslips()) {
+			if (!currentUserService.canAccessEmployeeRecord(payslip.getEmpId())) {
+				continue;
+			}
+			buckets.put(payslip.getCycleMonth(), buckets.getOrDefault(payslip.getCycleMonth(), ZERO).add(nz(payslip.getNetSalary())));
+		}
+		List<Map<String, Object>> rows = new ArrayList<>();
+		for (Map.Entry<String, BigDecimal> entry : buckets.entrySet()) {
+			Map<String, Object> row = new LinkedHashMap<>();
+			row.put("month", entry.getKey());
+			row.put("amount", entry.getValue());
+			rows.add(row);
+		}
+		return rows;
+	}
+
+	private List<Map<String, Object>> approvalEfficiency() {
+		Map<String, Integer> buckets = new LinkedHashMap<>();
+		buckets.put("请假待审", 0);
+		buckets.put("补卡待审", 0);
+		buckets.put("加班待审", 0);
+		buckets.put("工资待审", 0);
+		for (LeaveRequest leave : leaveRequestMapper.findAll()) {
+			if (isPendingStatus(leave.getStatus()) && currentUserService.canAccessEmployeeRecord(leave.getEmpId())) {
+				buckets.put("请假待审", buckets.get("请假待审") + 1);
+			}
+		}
+		for (AttendanceCorrection correction : enterpriseMapper.listCorrections()) {
+			if (isPendingStatus(correction.getStatus()) && currentUserService.canAccessEmployeeRecord(correction.getEmpId())) {
+				buckets.put("补卡待审", buckets.get("补卡待审") + 1);
+			}
+		}
+		for (OvertimeRequest overtime : enterpriseMapper.listOvertimeRequests()) {
+			if (isPendingStatus(overtime.getStatus()) && currentUserService.canAccessEmployeeRecord(overtime.getEmpId())) {
+				buckets.put("加班待审", buckets.get("加班待审") + 1);
+			}
+		}
+		for (Payslip payslip : enterpriseMapper.listPayslips()) {
+			if (isPendingStatus(payslip.getStatus()) && currentUserService.canAccessEmployeeRecord(payslip.getEmpId())) {
+				buckets.put("工资待审", buckets.get("工资待审") + 1);
+			}
+		}
+		return mapEntries(buckets, "type", "count");
+	}
+
+	private List<Map<String, Object>> mapEntries(Map<String, Integer> buckets, String keyName, String valueName) {
+		List<Map<String, Object>> rows = new ArrayList<>();
+		for (Map.Entry<String, Integer> entry : buckets.entrySet()) {
+			Map<String, Object> row = new LinkedHashMap<>();
+			row.put(keyName, entry.getKey());
+			row.put(valueName, entry.getValue());
+			rows.add(row);
+		}
+		return rows;
+	}
+
+	private boolean isPendingStatus(String status) {
+		return "PENDING".equalsIgnoreCase(status) || "PENDING_L1".equalsIgnoreCase(status) || "PENDING_L2".equalsIgnoreCase(status);
+	}
+
+	private void requireMonthUnlocked(String cycleMonth) {
+		AttendanceMonthLock lock = enterpriseMapper.findAttendanceMonthLock(cycleMonth);
+		if (lock != null && "LOCKED".equalsIgnoreCase(lock.getStatus())) {
+			throw new BizException(ErrorCode.BAD_REQUEST, cycleMonth + " 考勤月份已锁定，不能继续变更");
+		}
+	}
+
+	private boolean isLockedPayslip(String status) {
+		return "APPROVED".equalsIgnoreCase(status)
+				|| "PAID".equalsIgnoreCase(status)
+				|| "ACKNOWLEDGED".equalsIgnoreCase(status);
+	}
+
+	private void replacePayslipComponents(Payslip payslip) {
+		enterpriseMapper.deletePayslipComponents(payslip.getId());
+		addPayslipComponent(payslip, "基本工资", payslip.getBaseSalary(), "SALARY_STRUCTURE", payslip.getEmpId(), "员工基础薪资");
+		addPayslipComponent(payslip, "津贴", payslip.getAllowance(), "SALARY_STRUCTURE", payslip.getEmpId(), "薪资结构津贴");
+		addPayslipComponent(payslip, "奖金", payslip.getBonus(), "PERFORMANCE", payslip.getEmpId(), "绩效与固定奖金");
+		addPayslipComponent(payslip, "加班费", payslip.getOvertimePay(), "ATTENDANCE_SUMMARY", payslip.getEmpId(), "月度加班汇总");
+		addPayslipComponent(payslip, "请假扣款", nz(payslip.getLeaveDeduction()).negate(), "LEAVE", payslip.getEmpId(), "月度请假扣款");
+		addPayslipComponent(payslip, "社保", nz(payslip.getSocialSecurity()).negate(), "SALARY_STRUCTURE", payslip.getEmpId(), "社保扣款");
+		addPayslipComponent(payslip, "公积金", nz(payslip.getHousingFund()).negate(), "SALARY_STRUCTURE", payslip.getEmpId(), "公积金扣款");
+		addPayslipComponent(payslip, "个税", nz(payslip.getTax()).negate(), "TAX", payslip.getEmpId(), "个人所得税");
+	}
+
+	private void addPayslipComponent(Payslip payslip, String type, BigDecimal amount, String sourceType, Long sourceId, String remark) {
+		PayslipComponent component = new PayslipComponent();
+		component.setPayslipId(payslip.getId());
+		component.setComponentType(type);
+		component.setAmount(nz(amount));
+		component.setSourceType(sourceType);
+		component.setSourceId(sourceId);
+		component.setRemark(remark);
+		enterpriseMapper.insertPayslipComponent(component);
 	}
 
 	private void applyAttendanceCorrection(AttendanceCorrection correction) {
@@ -774,10 +1309,20 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	}
 
 	private void notifyEmployee(Long empId, String title, String content) {
+		notifyEmployee(empId, title, content, null, null);
+	}
+
+	private void notifyEmployee(Long empId, String title, String content, String bizType, Long bizId) {
+		if (bizType != null && bizId != null
+				&& enterpriseMapper.countUnreadNotificationByBiz(empId, bizType, bizId, title) > 0) {
+			return;
+		}
 		NotificationItem notification = new NotificationItem();
 		notification.setEmpId(empId);
 		notification.setTitle(title);
 		notification.setContent(content);
+		notification.setBizType(bizType);
+		notification.setBizId(bizId);
 		notification.setStatus("UNREAD");
 		enterpriseMapper.insertNotification(notification);
 	}
@@ -831,5 +1376,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			parts.add("\"" + text.replace("\"", "\"\"") + "\"");
 		}
 		return String.join(",", parts) + "\n";
+	}
+
+	private String unquote(String value) {
+		String text = value == null ? "" : value.trim();
+		if (text.length() >= 2 && text.startsWith("\"") && text.endsWith("\"")) {
+			text = text.substring(1, text.length() - 1);
+		}
+		return text.replace("\"\"", "\"");
 	}
 }

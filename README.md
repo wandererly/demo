@@ -28,9 +28,9 @@
 
 ## 运行环境
 
-- JDK 21 或更高
+- JDK 17 或更高
 - Maven 3.8+
-- Node.js 18+
+- Node.js 20.19+（Vite 8 要求）
 - MySQL 8+
 
 ## 快速开始
@@ -41,7 +41,7 @@
 CREATE DATABASE hrm DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-修改 `src/main/resources/application.yml` 中的 `spring.datasource` 为本机数据库账号密码。
+本地演示默认连接 `localhost:3306/hrm`，数据库用户为 `root`、密码为 `041029`。如果本机 MySQL 凭据不同，请设置 `DB_USERNAME`、`DB_PASSWORD`，也可以通过 `DB_URL` 指定连接地址。JWT 密钥可通过 `JWT_SECRET` 覆盖。生产部署必须启用 `prod` profile（`SPRING_PROFILES_ACTIVE=prod`），并显式设置数据库连接和 `JWT_SECRET`；生产配置不提供敏感配置默认值。
 
 2. 构建前端
 
@@ -79,6 +79,12 @@ java -jar target/hrm-0.1.0-SNAPSHOT.jar
 员工编号按部门延续：部门 ID 为 `3` 时，员工账号为 `e3001`、`e3002`、`e3003`。
 
 > 如果遇到 403 或登录状态异常，请清除浏览器 LocalStorage 中的 `hrm_token` 后重新登录。
+
+系统关闭了公开管理员注册入口。新用户请由管理员在“权限管理”中创建，并按角色分配权限。
+
+## 规则驱动能力
+
+系统将考勤、请假、绩效和薪酬规则配置化：管理员可以调整上下班时间、迟到宽限、请假审批级别、绩效分数区间、加班倍率和税率区间。规则会在申请、审批和工资条生成时自动生效；考勤月份锁定后不能继续修改，工资条保留基本工资、津贴、加班、扣款和个税等明细来源，便于追溯。
 
 ## 员工如何考勤
 
@@ -132,4 +138,3 @@ hrm.sql                        数据库结构参考
 - 管理员可在统一审批中心审批补卡/加班
 - 审批通过后考勤记录或月度汇总正确变化
 - 部门、岗位、员工、请假、绩效、薪酬、报表页面可正常访问
-

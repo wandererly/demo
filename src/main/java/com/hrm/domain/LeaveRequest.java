@@ -14,5 +14,6 @@ public class LeaveRequest {
 	private String reason;
 	private String status;
 	private Long approverId;
+	private Long assigneeUserId;
 	private LocalDateTime createdAt;
 }

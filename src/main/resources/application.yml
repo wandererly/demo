@@ -5,9 +5,9 @@ spring:
   application:
     name: hrm
   datasource:
-    url: jdbc:mysql://localhost:3306/hrm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: root
-    password: 041029
+    url: ${DB_URL:jdbc:mysql://localhost:3306/hrm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:041029}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 mybatis:
@@ -17,5 +17,9 @@ mybatis:
 
 security:
   jwt:
-    secret: "change-this-secret-please-change-32bytes"
-    expire-minutes: 120
+    secret: ${JWT_SECRET:change-this-secret-for-local-demo-only-32bytes}
+    expire-minutes: ${JWT_EXPIRE_MINUTES:120}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8080}

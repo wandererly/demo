@@ -39,7 +39,7 @@
         <input class="input" v-model="payslipSearch" placeholder="搜索员工/月份/状态" style="max-width:260px" />
       </div>
       <table class="table" v-if="filteredPayslips.length">
-        <thead><tr><th>员工</th><th>月份</th><th>基本</th><th>奖金</th><th>加班</th><th>扣款</th><th>税前</th><th>实发</th><th>绩效</th><th>状态</th></tr></thead>
+        <thead><tr><th>员工</th><th>月份</th><th>基本</th><th>奖金</th><th>加班</th><th>扣款</th><th>税前</th><th>实发</th><th>绩效</th><th>状态</th><th>操作</th></tr></thead>
         <tbody>
           <tr v-for="item in filteredPayslips" :key="item.id">
             <td>{{ employeeName(item.empId) }}</td>
@@ -52,10 +52,21 @@
             <td>{{ item.netSalary }}</td>
             <td>{{ item.performanceLevel || '-' }}</td>
             <td>{{ payslipStatus(item.status) }}</td>
+            <td>
+              <button class="btn-ghost" @click="loadComponents(item)">明细</button>
+              <button class="btn-ghost" @click="exportPayslip(item)">导出</button>
+            </td>
           </tr>
         </tbody>
       </table>
       <div v-else class="empty-state compact">暂无工资条</div>
+      <div v-if="components.length" class="card" style="background:var(--bg);margin-top:12px">
+        <h3>{{ componentTitle }}</h3>
+        <table class="table">
+          <thead><tr><th>项目</th><th>金额</th><th>来源</th><th>备注</th></tr></thead>
+          <tbody><tr v-for="item in components" :key="item.id"><td>{{ item.componentType }}</td><td>{{ item.amount }}</td><td>{{ item.sourceType }}</td><td>{{ item.remark || '-' }}</td></tr></tbody>
+        </table>
+      </div>
     </section>
 
     <section v-if="activeTab === 'structure'" class="card">
@@ -148,6 +159,8 @@ const salary = ref({ empId: '', baseSalary: '', allowance: '', bonus: '', social
 const salaryChange = ref({ empId: '', afterSalary: '', effectiveMonth: new Date().toISOString().slice(0, 7), reason: '' })
 const payslipGenerate = ref({ empId: '', cycleMonth: new Date().toISOString().slice(0, 7) })
 const payslipSearch = ref('')
+const components = ref([])
+const componentTitle = ref('')
 const calc = ref({ baseSalary: '', allowance: '', bonus: '', overtimeHours: '', overtimeRate: '', leaveDays: '', leaveDeductionPerDay: '', socialSecurity: '', housingFund: '', taxRate: '' })
 const calcResult = ref(null)
 const queryEmpId = ref('')
@@ -181,6 +194,13 @@ const generatePayslips = async () => {
     info.value = '工资条已生成并进入审批'
     await loadAll()
   } catch (e) { error.value = e.message }
+}
+const loadComponents = async (item) => {
+  components.value = await http.get(`/api/payroll/payslips/${item.id}/components`).catch(() => [])
+  componentTitle.value = `${employeeName(item.empId)} ${item.cycleMonth} 工资条明细`
+}
+const exportPayslip = (item) => {
+  window.location.href = `/api/export/payslips/${item.id}`
 }
 const submitSalaryChange = async () => {
   error.value = ''; info.value = ''
@@ -221,7 +241,7 @@ const loadRecords = async () => {
 }
 const employeeName = (id) => employees.value.find((item) => String(item.id) === String(id))?.name || `员工 #${id || '-'}`
 const employeeLabel = (employee) => `${employee.name}${employee.position ? `（${employee.position}）` : ''}`
-const payslipStatus = (status) => ({ PENDING: '待审批', APPROVED: '已通过', REJECTED: '已驳回', PAID: '已发放' }[status] || status || '-')
+const payslipStatus = (status) => ({ PENDING: '待审批', APPROVED: '已通过', REJECTED: '已驳回', PAID: '已发放', ACKNOWLEDGED: '已签收' }[status] || status || '-')
 
 onMounted(loadAll)
 </script>

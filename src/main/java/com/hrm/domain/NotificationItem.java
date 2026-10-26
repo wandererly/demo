@@ -10,6 +10,8 @@ public class NotificationItem {
 	private Long empId;
 	private String title;
 	private String content;
+	private String bizType;
+	private Long bizId;
 	private String status;
 	private LocalDateTime createdAt;
 }

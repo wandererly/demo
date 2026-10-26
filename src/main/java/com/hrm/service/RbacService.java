@@ -6,6 +6,8 @@ import com.hrm.domain.SysUserRole;
 import com.hrm.dto.RoleCreateRequest;
 import com.hrm.dto.RoleUpdateRequest;
 import com.hrm.dto.UserCreateRequest;
+import com.hrm.dto.EmployeePasswordResetRequest;
+import com.hrm.dto.PasswordResetRequest;
 import com.hrm.dto.UserRoleAssignRequest;
 import com.hrm.dto.UserUpdateRequest;
 import java.util.List;
@@ -14,6 +16,8 @@ public interface RbacService {
 	List<SysUser> listUsers();
 	SysUser createUser(UserCreateRequest request);
 	SysUser updateUser(Long id, UserUpdateRequest request);
+	SysUser resetPassword(Long id, PasswordResetRequest request);
+	SysUser resetEmployeePassword(EmployeePasswordResetRequest request);
 	void deleteUser(Long id);
 
 	List<SysRole> listRoles();

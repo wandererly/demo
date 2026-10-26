@@ -1,12 +1,14 @@
 package com.hrm.domain;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
 public class SysUser {
 	private Long id;
 	private String username;
+	@JsonIgnore
 	private String passwordHash;
 	private String role;
 	private Long empId;

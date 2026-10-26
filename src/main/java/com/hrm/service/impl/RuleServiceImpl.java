@@ -15,6 +15,7 @@ import com.hrm.mapper.PayrollRuleMapper;
 import com.hrm.mapper.PayrollTaxBracketMapper;
 import com.hrm.mapper.PerformanceRuleMapper;
 import com.hrm.service.RuleService;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,12 @@ public class RuleServiceImpl implements RuleService {
 
 	@Override
 	public LeaveRule upsertLeaveRule(LeaveRuleUpsertRequest request) {
+		if (request.getMaxDaysPerRequest() == null || request.getMaxDaysPerRequest() <= 0) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "单次最大请假天数必须大于0");
+		}
+		if (request.getApprovalLevel() == null || request.getApprovalLevel() < 1 || request.getApprovalLevel() > 2) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "审批级别只能是1或2级");
+		}
 		LeaveRule existing = leaveRuleMapper.findLatest();
 		LeaveRule rule = new LeaveRule();
 		rule.setMaxDaysPerRequest(request.getMaxDaysPerRequest());
@@ -63,6 +70,14 @@ public class RuleServiceImpl implements RuleService {
 
 	@Override
 	public PerformanceRule createPerformanceRule(PerformanceRuleCreateRequest request) {
+		if (request.getMinScore() > request.getMaxScore()) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "最低分不能高于最高分");
+		}
+		for (PerformanceRule existing : performanceRuleMapper.findAll()) {
+			if (request.getMinScore() <= existing.getMaxScore() && request.getMaxScore() >= existing.getMinScore()) {
+				throw new BizException(ErrorCode.BAD_REQUEST, "绩效分数区间与现有规则重叠");
+			}
+		}
 		PerformanceRule rule = new PerformanceRule();
 		rule.setMinScore(request.getMinScore());
 		rule.setMaxScore(request.getMaxScore());
@@ -86,6 +101,9 @@ public class RuleServiceImpl implements RuleService {
 
 	@Override
 	public PayrollRule upsertPayrollRule(PayrollRuleUpsertRequest request) {
+		if (request.getOvertimeMultiplier() == null || request.getOvertimeMultiplier() <= 0 || request.getOvertimeMultiplier() > 5) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "加班倍率必须在0到5之间");
+		}
 		PayrollRule existing = payrollRuleMapper.findLatest();
 		PayrollRule rule = new PayrollRule();
 		rule.setOvertimeMultiplier(request.getOvertimeMultiplier());
@@ -105,6 +123,25 @@ public class RuleServiceImpl implements RuleService {
 
 	@Override
 	public PayrollTaxBracket createPayrollTaxBracket(Long ruleId, PayrollTaxBracketCreateRequest request) {
+		if (ruleId == null || payrollRuleMapper.findById(ruleId) == null) {
+			throw new BizException(ErrorCode.NOT_FOUND, "薪酬规则不存在");
+		}
+		if (request.getMinIncome() == null || request.getMinIncome().compareTo(BigDecimal.ZERO) < 0
+				|| (request.getMaxIncome() != null && request.getMaxIncome().compareTo(request.getMinIncome()) <= 0)) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "税率区间无效，最高收入必须大于最低收入");
+		}
+		if (request.getRate() == null || request.getRate().compareTo(BigDecimal.ZERO) < 0
+				|| request.getRate().compareTo(BigDecimal.ONE) > 0) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "税率必须在0到100%之间");
+		}
+		for (PayrollTaxBracket existing : payrollTaxBracketMapper.findByRuleId(ruleId)) {
+			BigDecimal existingMax = existing.getMaxIncome();
+			boolean overlaps = (existingMax == null || request.getMinIncome().compareTo(existingMax) < 0)
+					&& (request.getMaxIncome() == null || existing.getMinIncome().compareTo(request.getMaxIncome()) < 0);
+			if (overlaps) {
+				throw new BizException(ErrorCode.BAD_REQUEST, "税率收入区间与现有规则重叠");
+			}
+		}
 		PayrollTaxBracket bracket = new PayrollTaxBracket();
 		bracket.setRuleId(ruleId);
 		bracket.setMinIncome(request.getMinIncome());

@@ -2,6 +2,7 @@ package com.hrm.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Data;
 
@@ -15,5 +16,6 @@ public class LifecycleEventRequest {
 	private Long toDeptId;
 	private String toPosition;
 	private LocalDate effectiveDate;
+	private BigDecimal targetSalary;
 	private String detail;
 }

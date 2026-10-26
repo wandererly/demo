@@ -16,6 +16,11 @@ public class Employee {
 	private Long deptId;
 	private String position;
 	private LocalDate hireDate;
+	private LocalDate probationStartDate;
+	private LocalDate probationEndDate;
+	private LocalDate regularizationDueDate;
+	private LocalDate resignedAt;
+	private Boolean accountLocked;
 	private String status;
 	private BigDecimal baseSalary;
 	private LocalDateTime createdAt;

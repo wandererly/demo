@@ -12,6 +12,7 @@ public class ApprovalTask {
 	private String applicantName;
 	private String status;
 	private Long approverId;
+	private Long assigneeUserId;
 	private String source;
 	private LocalDateTime createdAt;
 }

@@ -12,6 +12,10 @@ public class EmployeeContract {
 	private String contractType;
 	private LocalDate startDate;
 	private LocalDate endDate;
+	private LocalDate probationStartDate;
+	private LocalDate probationEndDate;
+	private String renewalStatus;
+	private Boolean reminderSent;
 	private String status;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;

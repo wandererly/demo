@@ -1,9 +1,6 @@
 create database if not exists hrm default character set utf8mb4 collate utf8mb4_0900_ai_ci;
 use hrm;
 
-create database if not exists hrm default character set utf8mb4 collate utf8mb4_0900_ai_ci;
-use hrm;
-
 create table if not exists department (
   id bigint primary key auto_increment,
   name varchar(100) not null,
@@ -41,7 +38,8 @@ create table if not exists attendance_record (
   check_out datetime,
   status varchar(20) not null default 'NORMAL',
   created_at datetime not null,
-  key idx_attendance_emp_date (emp_id, work_date)
+  unique key uk_attendance_emp_date (emp_id, work_date),
+  key idx_attendance_work_date (work_date)
 ) engine=InnoDB default charset=utf8mb4;
 
 create table if not exists leave_request (
@@ -114,7 +112,7 @@ create table if not exists payroll_record (
   leave_deduction decimal(12,2) not null,
   status varchar(20) not null default 'CALCULATED',
   created_at datetime not null,
-  key idx_payroll_emp_month (emp_id, cycle_month)
+  unique key uk_payroll_emp_month (emp_id, cycle_month)
 ) engine=InnoDB default charset=utf8mb4;
 
 create table if not exists payroll_item (
@@ -234,5 +232,4 @@ CREATE TABLE IF NOT EXISTS promotion_path (
   KEY idx_promotion_from (from_position_id),
   KEY idx_promotion_to (to_position_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 

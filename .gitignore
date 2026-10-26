@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local caches and generated files ###
+.m2/
+.m2home/
+frontend/node_modules/
+frontend/dist/
+logs/
+.claude/
+*.class
+HELP.md

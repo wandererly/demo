@@ -20,11 +20,10 @@
 
       <div class="login-card">
         <div class="auth-tabs">
-          <button :class="{ active: mode === 'login' }" @click="switchMode('login')">登录</button>
-          <button :class="{ active: mode === 'register' }" @click="switchMode('register')">注册</button>
+          <button class="active">登录</button>
         </div>
 
-        <div v-if="mode === 'login'" class="auth-form">
+        <div class="auth-form">
           <div>
             <div class="login-title">账号登录</div>
             <div class="login-sub">管理员进入管理后台，员工进入员工自助</div>
@@ -69,30 +68,6 @@
           <div v-if="error" class="alert auth-alert">{{ error }}</div>
         </div>
 
-        <div v-else class="auth-form">
-          <div>
-            <div class="login-title">注册管理员</div>
-            <div class="login-sub">创建账号后自动返回登录面板</div>
-          </div>
-
-          <input class="input auth-input" v-model="register.username" placeholder="新用户名" autocomplete="username" />
-          <div class="password-field">
-            <input
-              class="input auth-input"
-              :type="showRegisterPassword ? 'text' : 'password'"
-              v-model="register.password"
-              placeholder="新密码"
-              autocomplete="new-password"
-            />
-            <button type="button" @click="showRegisterPassword = !showRegisterPassword">{{ showRegisterPassword ? '隐藏' : '显示' }}</button>
-          </div>
-
-          <button class="btn-ghost auth-register" :disabled="regLoading" @click="registerAdmin">
-            <span v-if="regLoading" class="button-spinner dark"></span>
-            {{ regLoading ? '注册中...' : '注册管理员' }}
-          </button>
-          <div v-if="registerMsg" class="badge auth-message">{{ registerMsg }}</div>
-        </div>
       </div>
     </section>
   </div>
@@ -105,24 +80,13 @@ import { http } from '../api/http'
 import { setToken, setUser } from '../auth'
 
 const router = useRouter()
-const mode = ref('login')
 const error = ref('')
 const loading = ref(false)
-const registerMsg = ref('')
-const regLoading = ref(false)
 const captchaLoading = ref(false)
 const captchaImg = ref('')
 const captchaId = ref('')
 const showLoginPassword = ref(false)
-const showRegisterPassword = ref(false)
 const form = ref({ username: '', password: '', captchaCode: '', remember: true })
-const register = ref({ username: '', password: '' })
-
-const switchMode = (nextMode) => {
-  mode.value = nextMode
-  error.value = ''
-  registerMsg.value = ''
-}
 
 const fillDemo = (type) => {
   if (type === 'employee') {
@@ -141,7 +105,7 @@ const refreshCaptcha = async () => {
     captchaId.value = data.captchaId
     captchaImg.value = data.imageBase64
   } catch (e) {
-    error.value = mode.value === 'login' ? '验证码加载失败，请稍后重试' : error.value
+    error.value = '验证码加载失败，请稍后重试'
   } finally {
     captchaLoading.value = false
   }
@@ -179,25 +143,4 @@ const login = async () => {
   }
 }
 
-const registerAdmin = async () => {
-  registerMsg.value = ''
-  if (!register.value.username.trim() || !register.value.password.trim()) {
-    registerMsg.value = '请输入用户名和密码'
-    return
-  }
-  regLoading.value = true
-  try {
-    await http.post('/api/auth/register', {
-      username: register.value.username.trim(),
-      password: register.value.password
-    })
-    registerMsg.value = '管理员注册成功，请登录'
-    register.value = { username: '', password: '' }
-    setTimeout(() => switchMode('login'), 700)
-  } catch (e) {
-    registerMsg.value = e.message
-  } finally {
-    regLoading.value = false
-  }
-}
 </script>

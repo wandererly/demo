@@ -7,6 +7,8 @@ import com.hrm.domain.SysUser;
 import com.hrm.domain.SysUserRole;
 import com.hrm.dto.RoleCreateRequest;
 import com.hrm.dto.RoleUpdateRequest;
+import com.hrm.dto.EmployeePasswordResetRequest;
+import com.hrm.dto.PasswordResetRequest;
 import com.hrm.dto.UserCreateRequest;
 import com.hrm.dto.UserRoleAssignRequest;
 import com.hrm.dto.UserUpdateRequest;
@@ -14,7 +16,9 @@ import com.hrm.mapper.SysRoleMapper;
 import com.hrm.mapper.SysUserMapper;
 import com.hrm.mapper.SysUserRoleMapper;
 import com.hrm.service.RbacService;
+import com.hrm.service.EmployeeAccountService;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,15 +29,18 @@ public class RbacServiceImpl implements RbacService {
 	private final SysRoleMapper sysRoleMapper;
 	private final SysUserRoleMapper sysUserRoleMapper;
 	private final PasswordEncoder passwordEncoder;
+	private final EmployeeAccountService employeeAccountService;
 
 	public RbacServiceImpl(SysUserMapper sysUserMapper,
 						  SysRoleMapper sysRoleMapper,
 						  SysUserRoleMapper sysUserRoleMapper,
-						  PasswordEncoder passwordEncoder) {
+						  PasswordEncoder passwordEncoder,
+						  EmployeeAccountService employeeAccountService) {
 		this.sysUserMapper = sysUserMapper;
 		this.sysRoleMapper = sysRoleMapper;
 		this.sysUserRoleMapper = sysUserRoleMapper;
 		this.passwordEncoder = passwordEncoder;
+		this.employeeAccountService = employeeAccountService;
 	}
 
 	@Override
@@ -44,11 +51,11 @@ public class RbacServiceImpl implements RbacService {
 	@Override
 	public SysUser createUser(UserCreateRequest request) {
 		SysUser user = new SysUser();
-		user.setUsername(request.getUsername());
+		user.setUsername(normalizeUsername(request.getUsername()));
 		user.setPasswordHash(encodeIfNeeded(request.getPasswordHash()));
-		user.setRole(request.getRole() == null ? "EMPLOYEE" : request.getRole());
+		user.setRole(normalizeRole(request.getRole(), "EMPLOYEE"));
 		user.setEmpId(request.getEmpId());
-		user.setStatus(request.getStatus() == null ? "ACTIVE" : request.getStatus());
+		user.setStatus(normalizeStatus(request.getStatus(), "ACTIVE"));
 		sysUserMapper.insert(user);
 		return user;
 	}
@@ -59,14 +66,42 @@ public class RbacServiceImpl implements RbacService {
 		if (user == null) {
 			throw new BizException(ErrorCode.NOT_FOUND, "User not found");
 		}
-		user.setUsername(request.getUsername() == null ? user.getUsername() : request.getUsername());
+		if (request.getUsername() != null) {
+			user.setUsername(normalizeUsername(request.getUsername()));
+		}
 		String passwordHash = request.getPasswordHash();
-		user.setPasswordHash(passwordHash == null ? user.getPasswordHash() : encodeIfNeeded(passwordHash));
-		user.setRole(request.getRole() == null ? user.getRole() : request.getRole());
+		user.setPasswordHash(passwordHash == null || passwordHash.isBlank() ? user.getPasswordHash() : encodeIfNeeded(passwordHash));
+		if (request.getRole() != null) {
+			user.setRole(normalizeRole(request.getRole(), user.getRole()));
+		}
 		user.setEmpId(request.getEmpId() == null ? user.getEmpId() : request.getEmpId());
-		user.setStatus(request.getStatus() == null ? user.getStatus() : request.getStatus());
+		if (request.getStatus() != null) {
+			user.setStatus(normalizeStatus(request.getStatus(), user.getStatus()));
+		}
 		sysUserMapper.update(user);
 		return user;
+	}
+
+	@Override
+	public SysUser resetPassword(Long id, PasswordResetRequest request) {
+		SysUser user = sysUserMapper.findById(id);
+		if (user == null) {
+			throw new BizException(ErrorCode.NOT_FOUND, "User not found");
+		}
+		user.setPasswordHash(passwordEncoder.encode(request.getPassword().trim()));
+		sysUserMapper.update(user);
+		return user;
+	}
+
+	@Override
+	public SysUser resetEmployeePassword(EmployeePasswordResetRequest request) {
+		SysUser user = employeeAccountService.ensureEmployeeAccountByEmpNo(request.getEmpNo());
+		if (user == null || user.getId() == null) {
+			throw new BizException(ErrorCode.NOT_FOUND, "员工账号不存在");
+		}
+		PasswordResetRequest passwordRequest = new PasswordResetRequest();
+		passwordRequest.setPassword(request.getPassword());
+		return resetPassword(user.getId(), passwordRequest);
 	}
 
 	private String encodeIfNeeded(String rawOrHash) {
@@ -77,6 +112,44 @@ public class RbacServiceImpl implements RbacService {
 			return rawOrHash;
 		}
 		return passwordEncoder.encode(rawOrHash);
+	}
+
+	private String normalizeRequired(String value, String message) {
+		if (value == null || value.isBlank()) {
+			throw new BizException(ErrorCode.BAD_REQUEST, message);
+		}
+		return value.trim();
+	}
+
+	private String normalizeUsername(String username) {
+		return normalizeRequired(username, "登录账号不能为空");
+	}
+
+	private String normalizeRole(String role, String defaultRole) {
+		String value = role == null || role.isBlank() ? defaultRole : role.trim();
+		String builtin = value.toUpperCase(Locale.ROOT);
+		if (sysRoleMapper.findByKey(value) != null) {
+			return value;
+		}
+		if (sysRoleMapper.findByKey(builtin) != null) {
+			return builtin;
+		}
+		throw new BizException(ErrorCode.BAD_REQUEST, "角色编码不存在");
+	}
+
+	private String normalizeStatus(String status, String defaultStatus) {
+		String value = status == null || status.isBlank() ? defaultStatus : status.trim().toUpperCase(Locale.ROOT);
+		if ("INACTIVE".equals(value)) {
+			value = "DISABLED";
+		}
+		if (!List.of("ACTIVE", "DISABLED").contains(value)) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "账号状态只能是启用或停用");
+		}
+		return value;
+	}
+
+	private String normalizeNewRoleKey(String roleKey) {
+		return normalizeRequired(roleKey, "角色编码不能为空").toUpperCase(Locale.ROOT);
 	}
 
 	@Override
@@ -95,8 +168,11 @@ public class RbacServiceImpl implements RbacService {
 	@Override
 	public SysRole createRole(RoleCreateRequest request) {
 		SysRole role = new SysRole();
-		role.setRoleName(request.getRoleName());
-		role.setRoleKey(request.getRoleKey());
+		role.setRoleName(normalizeRequired(request.getRoleName(), "角色名称不能为空"));
+		role.setRoleKey(normalizeNewRoleKey(request.getRoleKey()));
+		if (sysRoleMapper.findByKey(role.getRoleKey()) != null) {
+			throw new BizException(ErrorCode.BAD_REQUEST, "角色编码已存在");
+		}
 		sysRoleMapper.insert(role);
 		return role;
 	}
@@ -107,8 +183,17 @@ public class RbacServiceImpl implements RbacService {
 		if (role == null) {
 			throw new BizException(ErrorCode.NOT_FOUND, "Role not found");
 		}
-		role.setRoleName(request.getRoleName() == null ? role.getRoleName() : request.getRoleName());
-		role.setRoleKey(request.getRoleKey() == null ? role.getRoleKey() : request.getRoleKey());
+		if (request.getRoleName() != null) {
+			role.setRoleName(normalizeRequired(request.getRoleName(), "角色名称不能为空"));
+		}
+		if (request.getRoleKey() != null) {
+			String roleKey = normalizeNewRoleKey(request.getRoleKey());
+			SysRole existingKey = sysRoleMapper.findByKey(roleKey);
+			if (existingKey != null && !existingKey.getId().equals(id)) {
+				throw new BizException(ErrorCode.BAD_REQUEST, "角色编码已存在");
+			}
+			role.setRoleKey(roleKey);
+		}
 		sysRoleMapper.update(role);
 		return role;
 	}
