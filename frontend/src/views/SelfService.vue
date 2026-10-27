@@ -110,14 +110,6 @@
       <div v-if="!leaves.length" class="empty-state compact">暂无请假记录</div>
     </section>
 
-    <section v-if="section === 'performance'" class="card">
-      <h3>我的绩效</h3>
-      <table class="table"><thead><tr><th>序号</th><th>目标</th><th>自评</th><th>上级评分</th><th>最终分</th><th>等级</th><th>状态</th></tr></thead>
-        <tbody><tr v-for="(item, idx) in goals" :key="item.id"><td>{{ idx + 1 }}</td><td>{{ item.goalTitle }}</td><td>{{ item.selfScore ?? '-' }}</td><td>{{ item.managerScore ?? '-' }}</td><td>{{ item.finalScore ?? '-' }}</td><td>{{ item.finalLevel || '-' }}</td><td>{{ perfStatus(item.status) }}</td></tr></tbody>
-      </table>
-      <div v-if="!goals.length" class="empty-state compact">暂无绩效目标</div>
-    </section>
-
     <section v-if="section === 'payslips'" class="card">
       <h3>我的工资条</h3>
       <table class="table"><thead><tr><th>序号</th><th>月份</th><th>基本工资</th><th>应发</th><th>实发</th><th>绩效</th><th>状态</th><th>操作</th></tr></thead>
@@ -155,7 +147,6 @@ const tabs = [
   { key: 'profile', label: '我的档案' },
   { key: 'attendance', label: '我的考勤' },
   { key: 'leave', label: '我的请假' },
-  { key: 'performance', label: '我的绩效' },
   { key: 'payslips', label: '我的工资条' },
   { key: 'notifications', label: '我的通知' }
 ]
@@ -165,7 +156,6 @@ const profile = ref(null)
 const attendance = ref([])
 const todayAttendance = ref(null)
 const leaves = ref([])
-const goals = ref([])
 const payslips = ref([])
 const notifications = ref([])
 const attendanceInfo = ref('')
@@ -201,7 +191,6 @@ const submitLeave = async () => {
     error.value = e.message
   }
 }
-const loadGoals = async () => { goals.value = await http.get('/api/self/performance-goals') || [] }
 const loadPayslips = async () => { payslips.value = await http.get('/api/self/payslips') || [] }
 const loadNotifications = async () => { notifications.value = await http.get('/api/self/notifications') || [] }
 
@@ -209,7 +198,6 @@ const loaders = {
   profile: loadProfile,
   attendance: loadAttendance,
   leave: loadLeave,
-  performance: loadGoals,
   payslips: loadPayslips,
   notifications: loadNotifications
 }
@@ -294,6 +282,5 @@ const money = (value) => value == null ? '-' : Number(value).toLocaleString('zh-
 const statusText = (value) => ({ ACTIVE: '在职', PROBATION: '试用', RESIGNED: '已离职', REGULARIZATION_PENDING: '转正待审', TRANSFER_PENDING: '调岗待审', RESIGNATION_PENDING: '离职待审' }[value] || value || '-')
 const attendanceText = (value) => ({ NORMAL: '正常', LATE: '迟到', EARLY: '早退', ABSENT: '缺勤', LEAVE: '请假' }[value] || value || '-')
 const approvalText = (value) => ({ PENDING: '待审批', PENDING_APPROVAL: '待审批', APPROVED: '已通过', REJECTED: '已驳回', PAID: '已发放', ACKNOWLEDGED: '已签收' }[value] || value || '-')
-const perfStatus = (value) => ({ GOAL_SETTING: '目标制定', SELF_REVIEW: '员工自评', MANAGER_REVIEW: '上级评审', CALIBRATING: '校准中', FINALIZED: '已定稿' }[value] || value || '-')
 const leaveType = (value) => ({ ANNUAL: '年假', PERSONAL: '事假', SICK: '病假', ADJUST: '调休', MARRIAGE: '婚假', MATERNITY: '产假', FUNERAL: '丧假' }[value] || value || '-')
 </script>

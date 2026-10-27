@@ -43,53 +43,6 @@
     </section>
 
     <section class="card">
-      <h3>新增角色</h3>
-      <div class="form-grid">
-        <input class="input" v-model="roleForm.roleName" placeholder="角色名称" />
-        <input class="input" v-model="roleForm.roleKey" placeholder="角色编码（系统使用）" />
-      </div>
-      <div class="actions">
-        <button class="btn" @click="createRole">创建角色</button>
-        <button class="btn-ghost" @click="loadRoles">刷新角色</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <h3>编辑角色</h3>
-      <div class="form-grid">
-        <input class="input" type="number" v-model="roleEdit.id" placeholder="角色ID" />
-        <input class="input" v-model="roleEdit.roleName" placeholder="角色名称" />
-        <input class="input" v-model="roleEdit.roleKey" placeholder="角色编码（系统使用）" />
-      </div>
-      <div class="actions">
-        <button class="btn" @click="updateRole">更新角色</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <h3>权限管理</h3>
-      <div class="form-grid">
-        <input class="input" v-model="permForm.permKey" placeholder="权限编码（如 hr:manage）" />
-        <input class="input" v-model="permForm.permName" placeholder="权限名称" />
-      </div>
-      <div class="actions">
-        <button class="btn" @click="createPerm">创建权限</button>
-        <button class="btn-ghost" @click="loadPerms">加载权限</button>
-      </div>
-
-      <div class="form-grid" style="margin-top:12px">
-        <input class="input" v-model="assign.roleKey" placeholder="角色编码" />
-        <input class="input" v-model="assign.permKey" placeholder="权限编码" />
-      </div>
-      <div class="actions">
-        <button class="btn" @click="assignPerm">授权</button>
-        <button class="btn-ghost" @click="revokePerm">撤销</button>
-        <button class="btn-ghost" @click="loadRolePerms">查看角色权限</button>
-      </div>
-      <div v-if="rolePerms.length" class="badge">{{ roleLabel(assign.roleKey) }}权限：{{ rolePerms.map((perm) => permissionLabel(perm)).join('、') }}</div>
-    </section>
-
-    <section class="card">
       <div class="actions" style="justify-content: space-between;">
         <h3 style="margin:0">用户列表</h3>
         <input class="input" v-model="userSearch" placeholder="搜索姓名或登录账号" style="max-width:240px" />
@@ -195,15 +148,10 @@ const users = ref([])
 const employees = ref([])
 const roles = ref([])
 const permissions = ref([])
-const rolePerms = ref([])
 
 const userForm = ref({ username: '', passwordHash: '', role: '', empId: '', status: '' })
 const userEdit = ref({ id: '', username: '', passwordHash: '', role: '', empId: '', status: '' })
 const employeeReset = ref({ empNo: '', password: '' })
-const roleForm = ref({ roleName: '', roleKey: '' })
-const roleEdit = ref({ id: '', roleName: '', roleKey: '' })
-const permForm = ref({ permKey: '', permName: '' })
-const assign = ref({ roleKey: '', permKey: '' })
 
 const userSearch = ref('')
 const roleSearch = ref('')
@@ -317,16 +265,6 @@ const loadPerms = async () => {
   }
 }
 
-const loadRolePerms = async () => {
-  error.value = ''
-  if (!assign.value.roleKey) return
-  try {
-    rolePerms.value = await http.get(`/api/permissions/role/${assign.value.roleKey}`)
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
 const createUser = async () => {
   error.value = ''
   notice.value = ''
@@ -402,73 +340,6 @@ const resetEmployeePassword = async () => {
     notice.value = `员工 ${employeeReset.value.empNo.toUpperCase()} 的密码已重置`
     employeeReset.value.password = ''
     await loadUsers()
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
-const createRole = async () => {
-  error.value = ''
-  try {
-    await http.post('/api/rbac/roles', {
-      roleName: roleForm.value.roleName,
-      roleKey: roleForm.value.roleKey
-    })
-    roleForm.value = { roleName: '', roleKey: '' }
-    await loadRoles()
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
-const updateRole = async () => {
-  error.value = ''
-  try {
-    await http.put(`/api/rbac/roles/${roleEdit.value.id}`, {
-      roleName: roleEdit.value.roleName || null,
-      roleKey: roleEdit.value.roleKey || null
-    })
-    await loadRoles()
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
-const createPerm = async () => {
-  error.value = ''
-  try {
-    await http.post('/api/permissions', {
-      permKey: permForm.value.permKey,
-      permName: permForm.value.permName
-    })
-    permForm.value = { permKey: '', permName: '' }
-    await loadPerms()
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
-const assignPerm = async () => {
-  error.value = ''
-  try {
-    await http.post('/api/permissions/assign', {
-      roleKey: assign.value.roleKey,
-      permKey: assign.value.permKey
-    })
-    await loadRolePerms()
-  } catch (e) {
-    error.value = e.message
-  }
-}
-
-const revokePerm = async () => {
-  error.value = ''
-  try {
-    await http.post('/api/permissions/revoke', {
-      roleKey: assign.value.roleKey,
-      permKey: assign.value.permKey
-    })
-    await loadRolePerms()
   } catch (e) {
     error.value = e.message
   }

@@ -17,16 +17,13 @@
       <router-link to="/" class="nav-link" active-class="active">工作台</router-link>
       <router-link v-if="hasPerm('hr:manage')" to="/employees" class="nav-link" active-class="active">员工管理</router-link>
       <router-link v-if="hasPerm('hr:manage')" to="/departments" class="nav-link" active-class="active">部门岗位</router-link>
-      <router-link v-if="hasPerm('hr:manage')" to="/org" class="nav-link" active-class="active">组织架构</router-link>
       <router-link v-if="hasPerm('attendance:manage')" to="/attendance" class="nav-link" active-class="active">考勤管理</router-link>
       <router-link v-if="hasPerm('leave:manage')" to="/leave" class="nav-link" active-class="active">请假管理</router-link>
-      <router-link v-if="hasPerm('perf:manage')" to="/performance" class="nav-link" active-class="active">绩效管理</router-link>
       <router-link v-if="hasPerm('payroll:manage')" to="/payroll" class="nav-link" active-class="active">薪酬管理</router-link>
       <router-link v-if="hasPerm('approval:manage')" to="/approvals" class="nav-link" active-class="active">统一审批</router-link>
       <router-link v-if="hasAnyPerm(['report:view','hr:manage','payroll:manage'])" to="/reports" class="nav-link" active-class="active">报表</router-link>
       <router-link v-if="hasPerm('rbac:manage')" to="/rbac" class="nav-link" active-class="active">权限管理</router-link>
       <router-link v-if="hasAnyPerm(['audit:view','config:manage'])" to="/audit-logs" class="nav-link" active-class="active">审计日志</router-link>
-      <router-link v-if="hasPerm('config:manage')" to="/settings" class="nav-link" active-class="active">系统设置</router-link>
     </template>
 
     <template v-if="showSelf">
