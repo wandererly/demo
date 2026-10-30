@@ -7,6 +7,7 @@ import com.hrm.domain.AttendanceRecord;
 import com.hrm.domain.AttendanceRuleConfig;
 import com.hrm.domain.Department;
 import com.hrm.domain.Employee;
+import com.hrm.domain.EmployeeContract;
 import com.hrm.domain.LeaveRequest;
 import com.hrm.domain.NotificationItem;
 import com.hrm.domain.Payslip;
@@ -80,6 +81,11 @@ public class SelfServiceController {
 	@GetMapping("/profile")
 	public ApiResponse<Employee> profile() {
 		return ApiResponse.ok(currentEmployee());
+	}
+
+	@GetMapping("/contracts")
+	public ApiResponse<List<EmployeeContract>> contracts() {
+		return ApiResponse.ok(enterpriseMapper.listContractsByEmpId(currentEmpId()));
 	}
 
 	@GetMapping("/attendance")

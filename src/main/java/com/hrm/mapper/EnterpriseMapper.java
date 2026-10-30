@@ -35,6 +35,10 @@ public interface EnterpriseMapper {
 			+ "from employee_contract order by id desc")
 	List<EmployeeContract> listContracts();
 
+	@Select("select id, emp_id, contract_no, contract_type, start_date, end_date, status, probation_start_date, probation_end_date, renewal_status, reminder_sent, created_at, updated_at "
+			+ "from employee_contract where emp_id = #{empId} order by start_date desc, id desc")
+	List<EmployeeContract> listContractsByEmpId(Long empId);
+
 	@Insert("insert into employee_contract(emp_id, contract_no, contract_type, start_date, end_date, status, probation_start_date, probation_end_date, renewal_status, reminder_sent, created_at, updated_at) "
 			+ "values(#{empId}, #{contractNo}, #{contractType}, #{startDate}, #{endDate}, #{status}, #{probationStartDate}, #{probationEndDate}, #{renewalStatus}, #{reminderSent}, now(), now())")
 	@Options(useGeneratedKeys = true, keyProperty = "id")

@@ -97,6 +97,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	}
 
 	@Override
+	@Transactional
 	public EmployeeContract createContract(ContractRequest request) {
 		Employee employee = requireEmployee(request.getEmpId());
 		EmployeeContract contract = new EmployeeContract();
@@ -125,6 +126,17 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		event.setStatus("APPROVED");
 		event.setDetail(contract.getContractType());
 		enterpriseMapper.insertLifecycleEvent(event);
+		String contractTypeName = switch (contract.getContractType()) {
+			case "FIXED" -> "固定期限劳动合同";
+			case "UNFIXED" -> "无固定期限劳动合同";
+			case "INTERNSHIP" -> "实习协议";
+			default -> "劳动合同";
+		};
+		notifyEmployee(employee.getId(), "劳动合同已登记",
+				"您有一份" + contractTypeName + "已登记，合同编号：" + contract.getContractNo()
+						+ "，开始日期：" + contract.getStartDate()
+						+ (contract.getEndDate() == null ? "" : "，结束日期：" + contract.getEndDate()),
+				"CONTRACT", contract.getId());
 		auditLogService.record("员工生命周期", "合同", "employee_contract", contract.getId(), employee.getName());
 		return contract;
 	}

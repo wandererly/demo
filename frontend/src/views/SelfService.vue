@@ -4,7 +4,7 @@
       <div class="page-head">
         <div>
           <h2>员工自助</h2>
-          <p class="muted">查看个人档案、考勤、请假、绩效、工资条和通知。</p>
+          <p class="muted">查看个人档案、劳动合同、考勤、请假、工资条和通知。</p>
         </div>
         <div v-if="profile" class="badge">{{ profile.name }} · {{ profile.position || '员工' }}</div>
       </div>
@@ -88,6 +88,27 @@
       <div v-if="!attendance.length" class="empty-state compact">暂无考勤记录</div>
     </section>
 
+    <section v-if="section === 'contracts'" class="card">
+      <div class="actions" style="justify-content: space-between; margin-top:0">
+        <h3 style="margin:0">我的合同</h3>
+        <button class="btn-ghost" @click="loadContracts">刷新</button>
+      </div>
+      <table class="table">
+        <thead><tr><th>合同编号</th><th>类型</th><th>开始日期</th><th>结束日期</th><th>试用期</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr v-for="contract in contracts" :key="contract.id">
+            <td>{{ contract.contractNo }}</td>
+            <td>{{ contractTypeText(contract.contractType) }}</td>
+            <td>{{ contract.startDate || '-' }}</td>
+            <td>{{ contract.endDate || '无固定结束日期' }}</td>
+            <td>{{ probationText(contract) }}</td>
+            <td>{{ contractStatusText(contract.status) }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="!contracts.length" class="empty-state compact">暂无合同记录</div>
+    </section>
+
     <section v-if="section === 'leave'" class="card">
       <h3>我的请假</h3>
       <div class="mini-panel self-leave-form">
@@ -145,6 +166,7 @@ const route = useRoute()
 const router = useRouter()
 const tabs = [
   { key: 'profile', label: '我的档案' },
+  { key: 'contracts', label: '我的合同' },
   { key: 'attendance', label: '我的考勤' },
   { key: 'leave', label: '我的请假' },
   { key: 'payslips', label: '我的工资条' },
@@ -155,6 +177,7 @@ const error = ref('')
 const profile = ref(null)
 const attendance = ref([])
 const todayAttendance = ref(null)
+const contracts = ref([])
 const leaves = ref([])
 const payslips = ref([])
 const notifications = ref([])
@@ -166,6 +189,7 @@ const leaveForm = ref({ leaveType: 'ANNUAL', startTime: '', endTime: '', days: '
 const leaveInfo = ref('')
 
 const loadProfile = async () => { profile.value = await http.get('/api/self/profile') }
+const loadContracts = async () => { contracts.value = await http.get('/api/self/contracts') || [] }
 const loadAttendance = async () => {
   const [todayData, rows] = await Promise.all([
     http.get('/api/self/attendance/today').catch(() => null),
@@ -196,6 +220,7 @@ const loadNotifications = async () => { notifications.value = await http.get('/a
 
 const loaders = {
   profile: loadProfile,
+  contracts: loadContracts,
   attendance: loadAttendance,
   leave: loadLeave,
   payslips: loadPayslips,
@@ -283,4 +308,9 @@ const statusText = (value) => ({ ACTIVE: '在职', PROBATION: '试用', RESIGNED
 const attendanceText = (value) => ({ NORMAL: '正常', LATE: '迟到', EARLY: '早退', ABSENT: '缺勤', LEAVE: '请假' }[value] || value || '-')
 const approvalText = (value) => ({ PENDING: '待审批', PENDING_APPROVAL: '待审批', APPROVED: '已通过', REJECTED: '已驳回', PAID: '已发放', ACKNOWLEDGED: '已签收' }[value] || value || '-')
 const leaveType = (value) => ({ ANNUAL: '年假', PERSONAL: '事假', SICK: '病假', ADJUST: '调休', MARRIAGE: '婚假', MATERNITY: '产假', FUNERAL: '丧假' }[value] || value || '-')
+const contractTypeText = (value) => ({ FIXED: '固定期限劳动合同', UNFIXED: '无固定期限劳动合同', INTERNSHIP: '实习协议' }[value] || value || '-')
+const contractStatusText = (value) => ({ ACTIVE: '生效中', EXPIRED: '已到期', TERMINATED: '已终止' }[value] || value || '-')
+const probationText = (contract) => contract.probationStartDate || contract.probationEndDate
+  ? `${contract.probationStartDate || '-'} 至 ${contract.probationEndDate || '-'}`
+  : '未设置'
 </script>

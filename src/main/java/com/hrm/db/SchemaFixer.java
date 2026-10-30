@@ -395,6 +395,10 @@ public class SchemaFixer implements CommandLineRunner {
 		ensureColumn("employee", "regularization_due_date", "date NULL");
 		ensureColumn("employee", "resigned_at", "date NULL");
 		ensureColumn("employee", "account_locked", "tinyint(1) NOT NULL DEFAULT 0");
+		ensureColumn("employee_contract", "probation_start_date", "date NULL");
+		ensureColumn("employee_contract", "probation_end_date", "date NULL");
+		ensureColumn("employee_contract", "renewal_status", "varchar(30) NULL");
+		ensureColumn("employee_contract", "reminder_sent", "tinyint(1) NOT NULL DEFAULT 0");
 		ensureColumn("leave_request", "assignee_user_id", "bigint NULL");
 		ensureColumn("employee_lifecycle_event", "assignee_user_id", "bigint NULL");
 		ensureColumn("employee_lifecycle_event", "target_salary", "decimal(12,2) NULL");

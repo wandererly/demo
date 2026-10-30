@@ -157,6 +157,7 @@
           <router-link class="btn-ghost" to="/approvals">查看统一审批</router-link>
         </div>
       </div>
+      <div v-if="lifecycleError" class="alert">{{ lifecycleError }}</div>
       <div v-if="lifecycleInfo" class="badge">{{ lifecycleInfo }}</div>
     </section>
 
@@ -204,6 +205,7 @@ import { http } from '../api/http'
 const list = ref([])
 const departments = ref([])
 const error = ref('')
+const lifecycleError = ref('')
 const lifecycleInfo = ref('')
 const contracts = ref([])
 const lifecycleEvents = ref([])
@@ -344,10 +346,10 @@ const update = async () => {
 }
 
 const createContract = async () => {
-  error.value = ''
+  lifecycleError.value = ''
   lifecycleInfo.value = ''
   if (!contractForm.value.empId || !contractForm.value.contractNo || !contractForm.value.contractType || !contractForm.value.startDate) {
-    error.value = '请选择员工并填写合同编号、类型和开始日期'
+    lifecycleError.value = '请选择员工并填写合同编号、类型和开始日期'
     return
   }
   try {
@@ -363,19 +365,19 @@ const createContract = async () => {
     lifecycleInfo.value = '合同创建成功'
     await loadLifecycle()
   } catch (e) {
-    error.value = e.message
+    lifecycleError.value = e.message
   }
 }
 
 const submitLifecycleEvent = async () => {
-  error.value = ''
+  lifecycleError.value = ''
   lifecycleInfo.value = ''
   if (!eventForm.value.empId || !eventForm.value.effectiveDate) {
-    error.value = '请选择员工和生效日期'
+    lifecycleError.value = '请选择员工和生效日期'
     return
   }
   if (lifecycleTab.value === 'transfer' && (!eventForm.value.toDeptId || !eventForm.value.toPosition)) {
-    error.value = '调岗需要选择目标部门并填写目标岗位'
+    lifecycleError.value = '调岗需要选择目标部门并填写目标岗位'
     return
   }
   try {
@@ -392,7 +394,7 @@ const submitLifecycleEvent = async () => {
     lifecycleInfo.value = '已提交统一审批'
     await loadLifecycle()
   } catch (e) {
-    error.value = e.message
+    lifecycleError.value = e.message
   }
 }
 

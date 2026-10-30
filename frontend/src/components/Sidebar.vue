@@ -29,9 +29,9 @@
     <template v-if="showSelf">
       <div class="nav-group">员工自助</div>
       <router-link to="/self/profile" class="nav-link" active-class="active">我的档案</router-link>
+      <router-link to="/self/contracts" class="nav-link" active-class="active">我的合同</router-link>
       <router-link to="/self/attendance" class="nav-link" active-class="active">我的考勤</router-link>
       <router-link to="/self/leave" class="nav-link" active-class="active">我的请假</router-link>
-      <router-link to="/self/performance" class="nav-link" active-class="active">我的绩效</router-link>
       <router-link to="/self/payslips" class="nav-link" active-class="active">我的工资条</router-link>
       <router-link to="/self/notifications" class="nav-link" active-class="active">我的通知</router-link>
     </template>
